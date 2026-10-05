@@ -99,3 +99,9 @@ button.sm,.btn.sm{padding:8px 12px;font-size:15px}
 @media(max-width:859px){.brand img{height:64px}}
 
 .danger{background:#b3261e!important;color:#fff!important}
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.subtabs .cnt{display:inline-block;min-width:22px;padding:0 6px;border-radius:99px;background:rgba(255,255,255,.22);font-size:13px}
+.subtabs .ghost .cnt{background:var(--beige-l);color:var(--navy)}
+input.bad,.chips.bad .chip span{border-color:var(--bad)!important}
+input.bad{box-shadow:0 0 0 3px rgba(179,38,30,.15)}
+.namefield input[type=text].bad{border-color:var(--bad)!important}
