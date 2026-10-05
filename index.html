@@ -19,12 +19,12 @@
   <div id="closed" class="card msg info" hidden></div>
   <div id="app" class="layout">
     <section class="stage-card card" id="stageCard" aria-label="معاينة الجاكيت">
-      <div class="stage" id="jacket"></div>
       <div class="namefield">
         <label for="jname" class="stephead" style="margin-bottom:8px"><span class="n">1</span><h2>الاسم أو الختم على الجاكيت</h2></label>
         <input id="jname" type="text" inputmode="text" lang="ar" dir="rtl" placeholder="اكتب هنا" autocomplete="off" enterkeyhint="done" required>
         <div class="counter"><span>حروف عربية فقط</span><span id="cnt"></span></div>
       </div>
+      <div class="stage" id="jacket"></div>
     </section>
     <form id="form" class="card" novalidate autocomplete="off">
       <div class="sect">
@@ -50,6 +50,10 @@
   </div>
   <div id="done" class="card done" hidden></div>
 </main>
+<div class="sendbar" id="sendbar" aria-live="polite">
+  <div class="sb-sum"><b id="sbName">—</b><span id="sbSize">اختر المقاس</span></div>
+  <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
+</div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
 <script src="assets/config.js?v=20261005b"></script>
 <script src="assets/icons.js?v=20261005b"></script>
@@ -104,6 +108,15 @@
     apply();
   });
 
+  /* شريط الإرسال السفلي (الجوال): ملخص + زر إرسال، ويختفي أثناء الكتابة */
+  function sbUpd() {
+    var sz = (form.querySelector("input[name=size]:checked") || {}).value;
+    $("sbName").textContent = nameEl.value.trim() || "—"; $("sbSize").textContent = sz ? "المقاس " + sz : "اختر المقاس";
+  }
+  nameEl.addEventListener("input", sbUpd); form.addEventListener("change", sbUpd); sbUpd();
+  $("sbSend").addEventListener("click", function () { if (form.requestSubmit) form.requestSubmit(); else $("send").click(); });
+  document.addEventListener("focusin", function (e) { if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.type !== "checkbox") document.body.classList.add("kb"); });
+  document.addEventListener("focusout", function () { setTimeout(function () { var a = document.activeElement; if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.type === "checkbox") document.body.classList.remove("kb"); }, 60); });
   nameEl.addEventListener("input", upd);
   nameEl.addEventListener("focus", function () { card.classList.add("typing"); Jacket.show(svg, "back"); });
   nameEl.addEventListener("blur", function () { card.classList.remove("typing"); });

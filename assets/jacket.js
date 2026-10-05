@@ -28,6 +28,12 @@
       '<div class="jtoggle" role="group" aria-label="وجه الجاكيت"><button type="button" data-v="back" aria-pressed="true">' + (window.IC?IC("shirt"):"") + 'الخلف</button><button type="button" data-v="front" aria-pressed="false">' + (window.IC?IC("shirt"):"") + 'الأمام</button></div>' +
       '</div>';
     var wrap = el.querySelector(".jwrap"); wrap.__p = p;
+    /* على الشاشات الكبيرة: الأمام والخلف معاً */
+    if (window.matchMedia) {
+      var mq = window.matchMedia("(min-width:860px)");
+      var both = function () { if (mq.matches && el.closest && el.closest(".stage-card")) { if (!wrap.__front) { wrap.__front = true; wrap.querySelector(".jv-front").innerHTML = frontSvg(); } } };
+      both(); if (mq.addEventListener) mq.addEventListener("change", both);
+    }
     wrap.addEventListener("click", function (e) {
       var b = e.target.closest && e.target.closest("button[data-v]"); if (b) show(wrap, b.getAttribute("data-v"));
     });
