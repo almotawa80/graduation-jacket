@@ -236,3 +236,9 @@ button,.btn,.lnk{gap:0}
   .stage-card .jtoggle svg.ic{display:none}
   .stage-card .jwrap{min-height:0}
 }
+/* الجوال: زر الأمام/الخلف تحت الصورة وليس فوقها */
+@media(max-width:859px){
+  .stage-card .jtoggle{position:static!important;transform:none!important;left:auto;right:auto;bottom:auto;width:max-content;margin:6px auto 2px;background:#fff}
+  .stage-card .jtoggle button{min-height:30px;padding:2px 12px}
+  .stage-card .jtoggle svg.ic{display:none!important}
+}
