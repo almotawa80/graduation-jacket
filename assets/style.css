@@ -190,3 +190,9 @@ header.top .ht{min-width:0}
 .brand img{display:block;height:46px;width:auto;background:#fff;padding:4px 6px;border-radius:8px;box-shadow:none}
 header.top:not(:has(.hd)){text-align:center;padding:14px 16px}
 @media(max-width:859px){.brand img{height:42px}header.top h1{font-size:19px}header.top p{font-size:13px}}
+
+/* توحيد أحجام الأيقونات بالبكسل (أمان على سفاري/آيباد) */
+svg.ic{width:18px!important;height:18px!important;max-width:18px;max-height:18px;min-width:18px;flex:none;margin:0 0 0 8px;vertical-align:middle}
+.stage svg.ic,.jtoggle svg.ic{width:16px!important;height:16px!important;max-width:16px;max-height:16px;min-width:16px;margin:0 0 0 6px}
+.lnk svg.ic{width:17px!important;height:17px!important;max-width:17px;max-height:17px;min-width:17px}
+button,.btn,.lnk{gap:0}
