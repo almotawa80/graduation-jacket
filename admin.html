@@ -27,6 +27,7 @@
       <button class="sm ghost" id="logout">خروج</button>
     </div>
 
+    <div id="note" class="msg err" role="status" hidden></div>
     <section id="vOrders">
       <div class="stats" id="stats"></div>
       <div class="sizes" id="sizeSum"></div>
@@ -66,6 +67,8 @@
   if (API.demo) $("demo").hidden = false;
   var KEY = "", ORDERS = [], SET = {};
   var LBL = { "new": "جديد", approved: "معتمد", edit: "بانتظار تعديل", cancelled: "ملغي" };
+  var noteT;
+  function note(m, ok) { var n = $("note"); n.textContent = m; n.className = "msg " + (ok ? "ok" : "err"); n.hidden = false; clearTimeout(noteT); noteT = setTimeout(function () { n.hidden = true; }, 5000); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
   async function load() {
@@ -91,7 +94,7 @@
     var t = (kind === "approved" ? SET.approveMsg : SET.editMsg).replace(/\{student\}/g, o.student).replace(/\{name\}/g, o.jacketName).replace(/\{size\}/g, o.size);
     return "https://wa.me/" + ph + "?text=" + encodeURIComponent(t);
   }
-  async function setStatus(id, st) { var r = await API.call("setStatus", { key: KEY, id: id, status: st }); if (r.ok) { ORDERS.forEach(function (o) { if (o.id === id) o.status = st; }); renderOrders(); } else alert(r.error); }
+  async function setStatus(id, st) { var r = await API.call("setStatus", { key: KEY, id: id, status: st }); if (r.ok) { ORDERS.forEach(function (o) { if (o.id === id) o.status = st; }); renderOrders(); } else note(r.error || "تعذّر تنفيذ العملية", false); }
 
   function renderOrders() {
     var c = { "new": 0, approved: 0, edit: 0 }, sz = {};
@@ -113,12 +116,20 @@
         '<div class="meta" dir="ltr" style="text-align:right">' + esc(o.phone) + '</div>' +
         '<div class="acts"><a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">اعتماد (واتساب)</a>' +
         '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">طلب تعديل (واتساب)</a>' +
-        '<button class="sm ghost" data-c="1">إلغاء</button></div>';
+        (o.status === "cancelled" ? '<button class="sm ghost" data-r="1">استعادة الطلب</button>' : '<button class="sm ghost" data-c="1">إلغاء الطلب</button>') + '</div>';
       d.querySelectorAll("a[data-a]").forEach(function (a) {
         a.href = waLink(o, a.dataset.a);
         a.addEventListener("click", function () { setStatus(o.id, a.dataset.a); });
       });
-      d.querySelector("[data-c]").onclick = function () { if (confirm("إلغاء هذا الطلب؟")) setStatus(o.id, "cancelled"); };
+      var acts = d.querySelector(".acts"), orig = acts.innerHTML;
+      var cb = d.querySelector("[data-c]"), rb = d.querySelector("[data-r]");
+      if (rb) rb.onclick = function () { setStatus(o.id, "new"); };
+      if (cb) cb.onclick = function () {
+        acts.innerHTML = '<div class="msg err" style="margin:0;flex:1 1 100%">هل تريد إلغاء طلب «' + esc(o.jacketName) + '» للطالب ' + esc(o.student) + '؟</div>' +
+          '<button class="sm danger" data-y="1">تأكيد الإلغاء</button><button class="sm ghost" data-n="1">تراجع</button>';
+        acts.querySelector("[data-y]").onclick = function () { this.disabled = true; this.textContent = "جارٍ الإلغاء..."; setStatus(o.id, "cancelled"); };
+        acts.querySelector("[data-n]").onclick = function () { renderOrders(); };
+      };
       $("list").appendChild(d);
     });
   }
@@ -142,7 +153,7 @@
     var s = { open: $("s_open").checked, maxChars: Math.max(1, Math.min(30, +$("s_max").value || 8)), number: $("s_num").value.trim(), title: $("s_title").value, intro: $("s_intro").value,
       closedMessage: $("s_closed").value, countryCode: API.digits($("s_cc").value) || "965", approveMsg: $("s_ap").value, editMsg: $("s_ed").value,
       sizes: Array.prototype.map.call($("s_sizes").querySelectorAll("input:checked"), function (i) { return i.value; }) };
-    if (!s.sizes.length) { alert("اختر مقاساً واحداً على الأقل."); return; }
+    if (!s.sizes.length) { note("اختر مقاساً واحداً على الأقل.", false); return; }
     var r = await API.call("saveSettings", { key: KEY, settings: s }), m = $("sres");
     m.className = "msg " + (r.ok ? "ok" : "err"); m.textContent = r.ok ? "تم حفظ الإعدادات." : (r.error || "تعذّر الحفظ"); m.hidden = false;
     if (r.ok) SET = Object.assign({}, SET, s);
