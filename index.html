@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1b2050">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>طلب جاكيت التخرج</title>
 <link rel="preconnect" href="https://script.google.com">
@@ -9,12 +11,12 @@
 <link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005j">
-<link rel="stylesheet" href="assets/style.css?v=20261005j">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005k">
+<link rel="stylesheet" href="assets/style.css?v=20261005k">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
-<header class="top"><div class="hd"><div class="brand"><img src="assets/logo-word.webp" alt="مدرسة الرؤية ثنائية اللغة" width="75" height="44" fetchpriority="high"></div><div class="ht"><h1 id="title">جاكيت التخرج</h1><p id="intro"></p></div></div></header>
+<header class="top"><div class="hd"><div class="brand"><img src="assets/logo-word.webp" alt="مدرسة الرؤية ثنائية اللغة" width="75" height="44" fetchpriority="high"></div><div class="ht"><span class="batch">دفعة التخرج</span><h1 id="title">جاكيت التخرج</h1><p id="intro"></p></div></div></header>
 <main>
   <div id="closed" class="card msg info" hidden></div>
   <div class="stepbar" id="stepbar" aria-hidden="true"><span class="on" id="sb1"><i>1</i> الاسم</span><span id="sb2"><i>2</i> البيانات</span></div>
@@ -58,10 +60,11 @@
   <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
 </div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
-<script src="assets/config.js?v=20261005j"></script>
-<script src="assets/icons.js?v=20261005j"></script>
-<script src="assets/api.js?v=20261005j"></script>
-<script src="assets/jacket.js?v=20261005j"></script>
+<script src="assets/config.js?v=20261005k"></script>
+<script src="assets/icons.js?v=20261005k"></script>
+<script src="assets/api.js?v=20261005k"></script>
+<script src="assets/jacket.js?v=20261005k"></script>
+<script src="assets/card.js?v=20261005k"></script>
 <script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
@@ -198,6 +201,10 @@
     var h = $("doneH"); h.className = ""; h.textContent = res.updated ? "تم تحديث طلبك بنجاح" : "تم استلام طلبك بنجاح";
     $("doneSub").textContent = "شكراً لك، وصلنا طلبك وسيراجعه المشرف.";
     $("doneId").innerHTML = "رقم الطلب: <b>" + res.id + "</b>";
+    var pill = document.createElement("div"); pill.className = "idpill"; pill.textContent = "#" + res.id; h.insertAdjacentElement("afterend", pill);
+    var sv = document.createElement("button"); sv.type = "button"; sv.className = "savebtn"; sv.innerHTML = IC("download") + "حفظ بطاقة الطلب كصورة";
+    sv.addEventListener("click", function () { sv.disabled = true; JacketCard.save({ id: res.id, name: jn, number: S.number, size: size, student: st }).catch(function () {}).then(function () { sv.disabled = false; }); });
+    $("doneNx").insertAdjacentElement("beforebegin", sv);
     $("doneNx").innerHTML = '<b>الخطوة التالية:</b> سيتواصل معك المشرف عبر واتساب على الرقم <b dir="ltr">' + esc2(ph) + '</b> لاعتماد الطلب. احتفظ برقم الطلب.';
   });
 })();

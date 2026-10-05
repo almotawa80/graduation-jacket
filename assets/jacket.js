@@ -58,6 +58,7 @@
 
   function update(svg, name, number) {
     var n = svg.querySelector(".jName"), d = svg.querySelector(".jNum");
+    if (n.textContent !== (name || "")) { n.classList.remove("jin"); void n.getBoundingClientRect(); n.classList.add("jin"); }
     n.textContent = name || ""; d.textContent = number || "";
     fit(n, 240, 92, 38);
     fit(d, 190, 150, 60);

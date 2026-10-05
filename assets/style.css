@@ -297,3 +297,73 @@ body.is-done .stepbar{display:none!important}
 /* الشعار الجديد: كلمة «الرؤية» مباشرة على الشريط الكحلي */
 .brand img{height:44px;width:auto;background:none;padding:0;border-radius:0;box-shadow:none}
 @media(max-width:859px){.brand img{height:40px}}
+
+/* ===== الهوية البصرية: كحلي + ذهبي هادئ، خط واحد، خلفية استوديو، حركات، وضع داكن ===== */
+:root{--gold:#c9a24b;--gold-l:#f3e7c4;--gold-d:#8a6a1c;color-scheme:light dark}
+body{font-weight:400}
+h1,h2,h3,.stephead h2,button,.chip span,.stepbar span,label,legend,b,strong{font-weight:700}
+/* خلفية استوديو ناعمة */
+body{background:radial-gradient(ellipse 90% 60% at 50% 0,#ffffff 0,#f1f3fa 55%,#e4e8f3 100%) fixed}
+.stage{background:radial-gradient(ellipse at 50% 35%,#fff 0,#f1f3fa 60%,#e1e6f2 100%);position:relative}
+.stage::after{content:"";position:absolute;left:18%;right:18%;bottom:2px;height:14px;background:radial-gradient(ellipse at center,rgba(20,24,56,.28),transparent 70%);filter:blur(3px);pointer-events:none}
+.stage-card .jv-back::after,.stage-card .jv-front::after{position:relative;z-index:1}
+/* رأس الصفحة: خط ذهبي وشارة الدفعة */
+header.top{border-bottom:3px solid var(--gold);background:linear-gradient(180deg,#252d6b,#1b2050)}
+header.top .batch{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--gold);border:1px solid rgba(201,162,75,.55);border-radius:99px;padding:0 10px;margin-bottom:3px;line-height:1.7}
+header.top h1{margin:0}
+/* لمسات الذهبي */
+.stephead .n{background:var(--navy);color:var(--gold);box-shadow:0 0 0 2px var(--gold-l)}
+.stepbar span.on{box-shadow:inset 0 -3px 0 var(--gold)}
+.stepbar span.on i{background:var(--gold);color:var(--navy)}
+.chip input:checked+span{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 8px 16px -10px var(--navy)}
+.counter #cnt{background:var(--gold-l);color:var(--gold-d)}
+input:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,162,75,.25)}
+button:focus-visible,.btn:focus-visible,.foot a:focus-visible{outline-color:var(--gold)}
+button.block{background:linear-gradient(180deg,#2a3380,#1d2252);color:#fff;border-bottom:3px solid var(--gold)}
+button.block .ic{color:var(--gold)}
+.check{background:var(--gold-l);color:#3d3210}
+.minisum{background:var(--gold-l)}
+/* ظهور الاسم على الجاكيت بحركة ناعمة */
+.jName{transform-box:fill-box;transform-origin:center}
+.jName.jin{animation:jin .22s ease-out}
+@keyframes jin{from{opacity:.35;transform:scale(.94)}to{opacity:1;transform:none}}
+/* بطاقة النجاح */
+.done{border-top:4px solid var(--gold);background:linear-gradient(180deg,#fffdf6,#fff 140px)}
+.done .idpill{display:inline-block;margin:6px auto 0;background:var(--navy);color:var(--gold);border-radius:99px;padding:4px 18px;font-size:20px;font-weight:700;letter-spacing:.03em}
+.done .stage{border:1px solid var(--gold-l)}
+.done .sum{background:var(--gold-l)}
+.savebtn{margin:14px auto 0;display:inline-flex;min-height:46px;background:#fff;color:var(--navy);border:1.5px solid var(--gold)}
+.savebtn:hover:not(:disabled){background:var(--gold-l);color:var(--navy)}
+.savebtn .ic{color:var(--gold-d)}
+@media(prefers-reduced-motion:reduce){.jName.jin{animation:none}}
+
+/* الوضع الداكن (يتبع إعداد الجهاز) */
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme=light]){--bg:#0e1124;--card:#181d42;--ink:#eceef8;--mut:#a9afd0;--line:#2c3466;--navy:#2f3a8c;--navy-d:#0e1124;--navy-l:#3d49a8;--beige-l:#262c5c;--gold-l:#2a2f5e;--gold-d:#e1c27a}
+  body{background:radial-gradient(ellipse 90% 60% at 50% 0,#1b2150 0,#12162f 60%,#0b0e20 100%) fixed;color:var(--ink)}
+  .stephead h2,.sb-sum b,.minisum .mt b,.stat b,.done h2.pending,.chip span,.namefield input[type=text],.lnk.boxed,.sizes span{color:#f1ecd6}
+  .stephead .n{background:var(--gold);color:#141838;box-shadow:none}
+  input[type=text],input[type=tel],input[type=password],input[type=number],textarea,select{background:#10143a;color:var(--ink);border-color:var(--line)}
+  .namefield input[type=text]{border-color:var(--gold)!important}
+  .chip span,.lnk.boxed,.sizes span{background:#10143a;border-color:var(--line)}
+  .chip input:checked+span{background:var(--navy);color:var(--gold)}
+  .check{background:#222857;color:var(--ink)}
+  .minisum,.sum{background:#222857}
+  .counter #cnt{background:#2a2f5e;color:var(--gold)}
+  .stepbar span{background:#222857;color:var(--mut)}
+  .stepbar span.on{background:var(--navy);color:var(--gold)}
+  .sendbar{background:rgba(20,24,58,.96)!important;border-top-color:var(--line)!important}
+  .jtoggle,.stage-card .jtoggle{background:#10143a!important;border-color:var(--line)}
+  .jtoggle button{color:var(--ink)}
+  .done{background:linear-gradient(180deg,#1d2350,var(--card) 140px)}
+  .done h2{color:#6fd3a0}.done h2.pending{color:#f1ecd6}
+  .savebtn{background:#10143a;color:var(--ink)}
+  .msg.info{background:#3a3112;color:#f3e2a8}.msg.err{background:#431a1a;color:#ffb4ab}.msg.ok{background:#173a2a;color:#9be3bd}
+  .order,.stat,.card{background:var(--card);border-color:var(--line)}
+  .seg{background:#10143a}.seg button{color:var(--mut)}.seg button[aria-pressed="true"]{background:var(--navy);color:var(--gold)}
+  .lnk:hover:not(:disabled){background:#222857;color:#fff}
+  .foot a{background:var(--card);color:var(--mut);border-color:var(--line)}
+  .tools input,.tools select{background:#10143a}
+  button.ghost,.btn.ghost{background:transparent;color:#f1ecd6;border-color:var(--gold)}
+  .spin.lg{border-color:#2c3466;border-top-color:var(--gold)}
+}
