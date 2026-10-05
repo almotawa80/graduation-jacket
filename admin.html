@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة المدير</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="demo" class="demo" hidden>وضع تجريبي: كلمة المرور <b>admin</b>، والبيانات في متصفحك فقط.</div>
+<header class="top"><h1>لوحة المدير</h1></header>
+<main>
+  <form id="login" class="card login">
+    <label for="pw">كلمة المرور</label>
+    <input id="pw" type="password" autocomplete="current-password" required>
+    <div id="lerr" class="msg err" hidden></div>
+    <button class="block" style="margin-top:12px">دخول</button>
+  </form>
+
+  <div id="panel" hidden>
+    <div class="tabs">
+      <button class="sm" id="tOrders">الطلبات</button>
+      <button class="sm ghost" id="tSettings">الإعدادات</button>
+      <button class="sm ghost" id="refresh">تحديث</button>
+      <button class="sm ghost" id="logout">خروج</button>
+    </div>
+
+    <section id="vOrders">
+      <div class="stats" id="stats"></div>
+      <div class="sizes" id="sizeSum"></div>
+      <div class="tools">
+        <input id="q" type="text" placeholder="بحث بالاسم أو الهاتف أو الصف">
+        <select id="fs"><option value="">كل الحالات</option><option value="new">جديد</option><option value="approved">معتمد</option><option value="edit">بانتظار تعديل</option><option value="cancelled">ملغي</option></select>
+        <button class="sm ghost" id="csv">تصدير Excel</button>
+      </div>
+      <div id="list" class="orders"></div>
+    </section>
+
+    <section id="vSettings" hidden>
+      <form id="sform" class="card">
+        <fieldset><label class="check"><input type="checkbox" id="s_open"><span>باب الطلبات مفتوح</span></label></fieldset>
+        <div class="row two">
+          <fieldset><label for="s_max">أقصى عدد حروف للاسم</label><input id="s_max" type="number" min="1" max="30"></fieldset>
+          <fieldset><label for="s_num">رقم الظهر (ثابت)</label><input id="s_num" type="text" inputmode="numeric" maxlength="3"></fieldset>
+        </div>
+        <fieldset><legend>المقاسات المتاحة</legend><div class="chips" id="s_sizes"></div></fieldset>
+        <fieldset><label for="s_title">عنوان الصفحة</label><input id="s_title" type="text"></fieldset>
+        <fieldset><label for="s_intro">نص التعريف</label><textarea id="s_intro" rows="2"></textarea></fieldset>
+        <fieldset><label for="s_closed">رسالة إغلاق الطلبات</label><input id="s_closed" type="text"></fieldset>
+        <fieldset><label for="s_cc">مفتاح الدولة لواتساب</label><input id="s_cc" type="text" inputmode="numeric" dir="ltr" style="text-align:right"><div class="hint">الكويت 965 — يُضاف للأرقام المكوّنة من 8 أرقام.</div></fieldset>
+        <fieldset><label for="s_ap">رسالة الاعتماد</label><textarea id="s_ap" rows="4"></textarea><div class="hint">المتغيرات: {student} اسم الطالب، {name} الاسم على الجاكيت، {size} المقاس</div></fieldset>
+        <fieldset><label for="s_ed">رسالة طلب تعديل الاسم</label><textarea id="s_ed" rows="4"></textarea></fieldset>
+        <div id="sres" class="msg ok" hidden></div>
+        <button class="block">حفظ الإعدادات</button>
+      </form>
+    </section>
+  </div>
+</main>
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  if (API.demo) $("demo").hidden = false;
+  var KEY = "", ORDERS = [], SET = {};
+  var LBL = { "new": "جديد", approved: "معتمد", edit: "بانتظار تعديل", cancelled: "ملغي" };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  async function load() {
+    var r = await API.call("orders", { key: KEY });
+    if (!r.ok) return r;
+    ORDERS = r.orders; SET = Object.assign({}, API.DEFAULTS, r.settings); return r;
+  }
+  $("login").addEventListener("submit", async function (e) {
+    e.preventDefault(); KEY = $("pw").value;
+    var r = await load();
+    if (!r.ok) { $("lerr").textContent = r.error || "تعذّر الدخول"; $("lerr").hidden = false; return; }
+    try { sessionStorage.setItem("jk_key", KEY); } catch (x) {}
+    show();
+  });
+  function show() { $("login").hidden = true; $("panel").hidden = false; renderOrders(); fillSettings(); }
+  $("logout").onclick = function () { try { sessionStorage.removeItem("jk_key"); } catch (x) {} location.reload(); };
+  $("refresh").onclick = async function () { await load(); renderOrders(); };
+  function tab(o) { $("vOrders").hidden = !o; $("vSettings").hidden = o; $("tOrders").className = "sm" + (o ? "" : " ghost"); $("tSettings").className = "sm" + (o ? " ghost" : ""); }
+  $("tOrders").onclick = function () { tab(true); }; $("tSettings").onclick = function () { tab(false); };
+
+  function waLink(o, kind) {
+    var ph = API.digits(o.phone); if (ph.length === 8) ph = (SET.countryCode || "965") + ph;
+    var t = (kind === "approved" ? SET.approveMsg : SET.editMsg).replace(/\{student\}/g, o.student).replace(/\{name\}/g, o.jacketName).replace(/\{size\}/g, o.size);
+    return "https://wa.me/" + ph + "?text=" + encodeURIComponent(t);
+  }
+  async function setStatus(id, st) { var r = await API.call("setStatus", { key: KEY, id: id, status: st }); if (r.ok) { ORDERS.forEach(function (o) { if (o.id === id) o.status = st; }); renderOrders(); } else alert(r.error); }
+
+  function renderOrders() {
+    var c = { "new": 0, approved: 0, edit: 0 }, sz = {};
+    ORDERS.forEach(function (o) { if (c[o.status] != null) c[o.status]++; if (o.status !== "cancelled") sz[o.size] = (sz[o.size] || 0) + 1; });
+    $("stats").innerHTML = [["الكل", ORDERS.length], ["جديد", c["new"]], ["معتمد", c.approved], ["بانتظار تعديل", c.edit]].map(function (x) { return '<div class="stat"><b>' + x[1] + "</b>" + x[0] + "</div>"; }).join("");
+    $("sizeSum").innerHTML = API.ALL_SIZES.map(function (z) { return "<span>" + z + ": " + (sz[z] || 0) + "</span>"; }).join("");
+    var q = $("q").value.trim(), fs = $("fs").value;
+    var rows = ORDERS.filter(function (o) {
+      if (fs && o.status !== fs) return false;
+      if (!q) return true;
+      return [o.student, o.jacketName, o.grade, o.phone].join(" ").indexOf(q) > -1;
+    }).sort(function (a, b) { return b.id - a.id; });
+    $("list").innerHTML = rows.length ? "" : '<div class="msg info">لا توجد طلبات.</div>';
+    rows.forEach(function (o) {
+      var d = document.createElement("div"); d.className = "order";
+      d.innerHTML = '<div class="nm">' + esc(o.jacketName) + '</div>' +
+        '<div><b>' + esc(o.student) + '</b> <span class="badge b-' + o.status + '">' + LBL[o.status] + '</span></div>' +
+        '<div class="meta">الصف: ' + esc(o.grade) + ' · المقاس: <b>' + esc(o.size) + '</b> · #' + o.id + '</div>' +
+        '<div class="meta" dir="ltr" style="text-align:right">' + esc(o.phone) + '</div>' +
+        '<div class="acts"><a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">اعتماد (واتساب)</a>' +
+        '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">طلب تعديل (واتساب)</a>' +
+        '<button class="sm ghost" data-c="1">إلغاء</button></div>';
+      d.querySelectorAll("a[data-a]").forEach(function (a) {
+        a.href = waLink(o, a.dataset.a);
+        a.addEventListener("click", function () { setStatus(o.id, a.dataset.a); });
+      });
+      d.querySelector("[data-c]").onclick = function () { if (confirm("إلغاء هذا الطلب؟")) setStatus(o.id, "cancelled"); };
+      $("list").appendChild(d);
+    });
+  }
+  $("q").oninput = renderOrders; $("fs").onchange = renderOrders;
+
+  $("csv").onclick = function () {
+    var h = ["رقم", "التاريخ", "الاسم على الجاكيت", "الرقم", "المقاس", "الطالب", "الصف", "الهاتف", "الحالة"];
+    var L = [h].concat(ORDERS.map(function (o) { return [o.id, o.createdAt, o.jacketName, o.number, o.size, o.student, o.grade, o.phone, LBL[o.status]]; }));
+    var t = L.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + t], { type: "text/csv;charset=utf-8" })); a.download = "orders.csv"; a.click();
+  };
+
+  function fillSettings() {
+    $("s_open").checked = !!SET.open; $("s_max").value = SET.maxChars; $("s_num").value = SET.number;
+    $("s_title").value = SET.title; $("s_intro").value = SET.intro; $("s_closed").value = SET.closedMessage;
+    $("s_cc").value = SET.countryCode; $("s_ap").value = SET.approveMsg; $("s_ed").value = SET.editMsg;
+    $("s_sizes").innerHTML = API.ALL_SIZES.map(function (z) { return '<label class="chip"><input type="checkbox" value="' + z + '"' + (SET.sizes.indexOf(z) > -1 ? " checked" : "") + "><span>" + z + "</span></label>"; }).join("");
+  }
+  $("sform").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var s = { open: $("s_open").checked, maxChars: Math.max(1, Math.min(30, +$("s_max").value || 8)), number: $("s_num").value.trim(), title: $("s_title").value, intro: $("s_intro").value,
+      closedMessage: $("s_closed").value, countryCode: API.digits($("s_cc").value) || "965", approveMsg: $("s_ap").value, editMsg: $("s_ed").value,
+      sizes: Array.prototype.map.call($("s_sizes").querySelectorAll("input:checked"), function (i) { return i.value; }) };
+    if (!s.sizes.length) { alert("اختر مقاساً واحداً على الأقل."); return; }
+    var r = await API.call("saveSettings", { key: KEY, settings: s }), m = $("sres");
+    m.className = "msg " + (r.ok ? "ok" : "err"); m.textContent = r.ok ? "تم حفظ الإعدادات." : (r.error || "تعذّر الحفظ"); m.hidden = false;
+    if (r.ok) SET = Object.assign({}, SET, s);
+  });
+
+  try { var k = sessionStorage.getItem("jk_key"); if (k) { KEY = k; load().then(function (r) { if (r.ok) show(); }); } } catch (x) {}
+})();
+</script>
+</body>
+</html>
