@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>لوحة المدير</title>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005e">
-<link rel="stylesheet" href="assets/style.css?v=20261005e">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005g">
+<link rel="stylesheet" href="assets/style.css?v=20261005g">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: كلمة المرور <b>admin</b>، والبيانات في متصفحك فقط.</div>
@@ -35,6 +35,7 @@
       </div>
     </div>
 
+    <div id="sync" class="msg info" hidden><span class="spin"></span>جارٍ تحديث الطلبات…</div>
     <div id="note" class="msg err" role="status" hidden></div>
     <section id="vOrders">
       <div class="seg seg2" role="group" aria-label="قوائم الطلبات">
@@ -71,23 +72,25 @@
     </section>
   </div>
 </main>
-<script src="assets/icons.js?v=20261005e"></script>
-<script src="assets/config.js?v=20261005e"></script>
-<script src="assets/api.js?v=20261005e"></script>
+<script src="assets/icons.js?v=20261005g"></script>
+<script src="assets/config.js?v=20261005g"></script>
+<script src="assets/api.js?v=20261005g"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  if (API.demo) $("demo").hidden = false;
+  if (API.demo) $("demo").hidden = false; else API.call("settings");   /* إيقاظ الخادم مبكراً */
   var KEY = "", ORDERS = [], SET = {};
   var LBL = { "new": "جديد", approved: "معتمد", edit: "بانتظار تعديل", cancelled: "ملغي" };
   var noteT;
   function note(m, ok) { var n = $("note"); n.textContent = m; n.className = "msg " + (ok ? "ok" : "err"); n.hidden = false; clearTimeout(noteT); noteT = setTimeout(function () { n.hidden = true; }, 5000); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
+  /* نسخة محلية من الطلبات للعرض الفوري (على جهاز المدير فقط، عند تفعيل «تذكّر هذا الجهاز») */
+  function saveCache() { try { if (localStorage.getItem("jk_key")) localStorage.setItem("jk_orders", JSON.stringify({ o: ORDERS, s: SET })); } catch (x) {} }
   async function load() {
     var r = await API.call("orders", { key: KEY });
     if (!r.ok) return r;
-    ORDERS = r.orders; SET = Object.assign({}, API.DEFAULTS, r.settings); return r;
+    ORDERS = r.orders; SET = Object.assign({}, API.DEFAULTS, r.settings); saveCache(); return r;
   }
   $("login").addEventListener("submit", async function (e) {
     e.preventDefault(); KEY = $("pw").value;
@@ -111,7 +114,13 @@
     var t = (kind === "approved" ? SET.approveMsg : SET.editMsg).replace(/\{student\}/g, o.student).replace(/\{name\}/g, o.jacketName).replace(/\{size\}/g, o.size);
     return "https://wa.me/" + ph + "?text=" + encodeURIComponent(t);
   }
-  async function setStatus(id, st) { var r = await API.call("setStatus", { key: KEY, id: id, status: st }); if (r.ok) { ORDERS.forEach(function (o) { if (o.id === id) o.status = st; }); renderOrders(); } else note(r.error || "تعذّر تنفيذ العملية", false); }
+  async function setStatus(id, st) {
+    /* تحديث فوري للواجهة ثم تأكيد من الخادم؛ وعند الفشل نعيد الحالة السابقة */
+    var o0 = ORDERS.filter(function (o) { return o.id === id; })[0]; if (!o0) return;
+    var prev = o0.status; o0.status = st; renderOrders(); saveCache();
+    var r = await API.call("setStatus", { key: KEY, id: id, status: st });
+    if (!r.ok) { o0.status = prev; renderOrders(); saveCache(); note(r.error || "تعذّر تنفيذ العملية، أُعيدت الحالة السابقة.", false); }
+  }
 
   IC.apply();
   var VIEW = "active";
@@ -207,9 +216,13 @@
   (async function restore() {
     var k = null; try { k = sessionStorage.getItem("jk_key") || localStorage.getItem("jk_key"); } catch (x) {}
     if (!k) return;
-    KEY = k; $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
+    KEY = k; $("login").hidden = true; $("panel").hidden = false;
+    var cached = null; try { cached = JSON.parse(localStorage.getItem("jk_orders") || "null"); } catch (x) {}
+    if (cached && cached.o) { ORDERS = cached.o; SET = Object.assign({}, API.DEFAULTS, cached.s); show(); $("sync").hidden = false; }
+    else $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
     var r;
     for (var i = 0; i < 3; i++) { r = await load(); if (r.ok || !/تعذّر الاتصال/.test(r.error || "")) break; await new Promise(function (z) { setTimeout(z, 1200); }); }
+    $("sync").hidden = true;
     if (r.ok) { show(); return; }
     if (/تعذّر الاتصال/.test(r.error || "")) { $("list").innerHTML = ""; note("تعذّر الاتصال بالخادم. اضغط «تحديث» لإعادة المحاولة.", false); return; }
     try { sessionStorage.removeItem("jk_key"); localStorage.removeItem("jk_key"); } catch (x) {}

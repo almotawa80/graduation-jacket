@@ -287,3 +287,9 @@ body.is-done{padding-bottom:0}
 
 button.nextbtn{display:none}
 @media(max-width:859px){button.nextbtn{display:flex}}
+
+.pendmark{height:84px;display:grid;place-items:center;margin-bottom:6px}
+.spin.lg{width:54px;height:54px;border-width:5px;margin:0;color:var(--navy)}
+.done h2.pending{color:var(--navy)}
+body.is-done .stepbar{display:none!important}
+.spin.lg{display:block;border:5px solid #d9deec;border-top-color:var(--navy);color:var(--navy)}

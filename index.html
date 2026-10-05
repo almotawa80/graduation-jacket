@@ -9,8 +9,8 @@
 <link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005e">
-<link rel="stylesheet" href="assets/style.css?v=20261005e">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005g">
+<link rel="stylesheet" href="assets/style.css?v=20261005g">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
@@ -58,10 +58,10 @@
   <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
 </div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
-<script src="assets/config.js?v=20261005e"></script>
-<script src="assets/icons.js?v=20261005e"></script>
-<script src="assets/api.js?v=20261005e"></script>
-<script src="assets/jacket.js?v=20261005e"></script>
+<script src="assets/config.js?v=20261005g"></script>
+<script src="assets/icons.js?v=20261005g"></script>
+<script src="assets/api.js?v=20261005g"></script>
+<script src="assets/jacket.js?v=20261005g"></script>
 <script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
@@ -177,19 +177,28 @@
     await settingsReady;                      /* يضمن استخدام أحدث إعدادات المقاسات والحروف */
     if (!S.open) { b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب"; return fail(S.closedMessage); }
     if (jn.length > max || S.sizes.indexOf(size) < 0) { b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب"; return fail(jn.length > max ? "الاسم أطول من الحد المسموح (" + max + " حروف)." : "المقاس غير متاح."); }
-    var res = await API.call("submit", { order: { jacketName: jn, size: size, student: st, grade: gr, phone: ph } });
-    b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب";
-    if (!res.ok) return fail(res.error || "تعذّر إرسال الطلب.");
+    /* إظهار شاشة «جارٍ الإرسال» فوراً، ثم تحويلها إلى «تم الاستلام» عند ردّ الخادم؛ وإن فشل نعود للنموذج */
     $("app").hidden = true; document.body.classList.add("is-done"); var d = $("done"); d.hidden = false;
-    d.innerHTML = '<svg class="okmark" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M14 27l8 8 16-17"/></svg>' +
-      '<h2 id="doneH" tabindex="-1">' + (res.updated ? "تم تحديث طلبك بنجاح" : "تم استلام طلبك بنجاح") + '</h2>' +
-      '<p class="sub">شكراً لك، وصلنا طلبك وسيراجعه المشرف.</p>' +
+    d.innerHTML = '<div class="pendmark" id="pendM"><span class="spin lg"></span></div>' +
+      '<h2 id="doneH" tabindex="-1" class="pending">جارٍ إرسال طلبك…</h2>' +
+      '<p class="sub" id="doneSub">لحظات من فضلك ولا تغلق الصفحة.</p>' +
       '<div class="stage" style="max-width:240px;margin:6px auto 0"></div>' +
-      '<div class="sum"><div>رقم الطلب: <b>' + res.id + '</b></div><div>الاسم الكامل: <b>' + esc2(st) + '</b></div><div>المقاس: <b>' + size + '</b></div></div>' +
-      '<div class="msg info nx"><b>الخطوة التالية:</b> سيتواصل معك المشرف عبر واتساب على الرقم <b dir="ltr">' + esc2(ph) + '</b> لاعتماد الطلب. احتفظ برقم الطلب.</div>';
+      '<div class="sum"><div id="doneId">رقم الطلب: <b>…</b></div><div>الاسم الكامل: <b>' + esc2(st) + '</b></div><div>المقاس: <b>' + size + '</b></div></div>' +
+      '<div class="msg info nx" id="doneNx"><b>تنبيه:</b> لا تعتبر الطلب مستلماً حتى تظهر علامة الصح الخضراء.</div>';
     var s2 = Jacket.mount(d.querySelector(".stage")); Jacket.update(s2, jn, S.number);
     var top = function () { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; try { $("doneH").focus({ preventScroll: true }); } catch (e) {} };
     top(); requestAnimationFrame(top); setTimeout(top, 120);
+    var res = await API.call("submit", { order: { jacketName: jn, size: size, student: st, grade: gr, phone: ph } });
+    b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب";
+    if (!res.ok) {
+      d.hidden = true; d.innerHTML = ""; document.body.classList.remove("is-done"); $("app").hidden = false;
+      window.scrollTo(0, 0); return fail(res.error || "تعذّر إرسال الطلب.");
+    }
+    $("pendM").outerHTML = '<svg class="okmark" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M14 27l8 8 16-17"/></svg>';
+    var h = $("doneH"); h.className = ""; h.textContent = res.updated ? "تم تحديث طلبك بنجاح" : "تم استلام طلبك بنجاح";
+    $("doneSub").textContent = "شكراً لك، وصلنا طلبك وسيراجعه المشرف.";
+    $("doneId").innerHTML = "رقم الطلب: <b>" + res.id + "</b>";
+    $("doneNx").innerHTML = '<b>الخطوة التالية:</b> سيتواصل معك المشرف عبر واتساب على الرقم <b dir="ltr">' + esc2(ph) + '</b> لاعتماد الطلب. احتفظ برقم الطلب.';
   });
 })();
 </script>
