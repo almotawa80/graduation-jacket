@@ -105,3 +105,5 @@ button.sm,.btn.sm{padding:8px 12px;font-size:15px}
 input.bad,.chips.bad .chip span{border-color:var(--bad)!important}
 input.bad{box-shadow:0 0 0 3px rgba(179,38,30,.15)}
 .namefield input[type=text].bad{border-color:var(--bad)!important}
+.danger-o{color:#b3261e!important;border-color:#b3261e!important}
+.danger-o:hover:not(:disabled){background:#fde8e6!important}

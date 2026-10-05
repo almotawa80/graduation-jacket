@@ -132,7 +132,7 @@
         '<div class="meta">الصف: ' + esc(o.grade) + ' · المقاس: <b>' + esc(o.size) + '</b> · #' + o.id + '</div>' +
         '<div class="meta" dir="ltr" style="text-align:right">' + esc(o.phone) + '</div>' +
         '<div class="acts">' + (o.status === "cancelled"
-          ? '<button class="sm ghost" data-r="1">استعادة الطلب</button>'
+          ? '<button class="sm ghost" data-r="1">استعادة الطلب</button><button class="sm ghost danger-o" data-d="1">حذف نهائي</button>'
           : '<a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">اعتماد (واتساب)</a>' +
             '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">طلب تعديل (واتساب)</a>' +
             '<button class="sm ghost" data-c="1">إلغاء الطلب</button>') + '</div>';
@@ -143,6 +143,18 @@
       var acts = d.querySelector(".acts"), orig = acts.innerHTML;
       var cb = d.querySelector("[data-c]"), rb = d.querySelector("[data-r]");
       if (rb) rb.onclick = function () { setStatus(o.id, "new"); };
+      var db = d.querySelector("[data-d]");
+      if (db) db.onclick = function () {
+        acts.innerHTML = '<div class="msg err" style="margin:0;flex:1 1 100%"><b>حذف نهائي</b> لطلب «' + esc(o.jacketName) + '» للطالب ' + esc(o.student) + '؟ لا يمكن التراجع عن هذا الإجراء.</div>' +
+          '<button class="sm danger" data-y="1">تأكيد الحذف النهائي</button><button class="sm ghost" data-n="1">تراجع</button>';
+        acts.querySelector("[data-n]").onclick = function () { renderOrders(); };
+        acts.querySelector("[data-y]").onclick = async function () {
+          this.disabled = true; this.textContent = "جارٍ الحذف...";
+          var r = await API.call("deleteOrder", { key: KEY, id: o.id });
+          if (r.ok) { ORDERS = ORDERS.filter(function (x) { return x.id !== o.id; }); renderOrders(); note("تم حذف الطلب نهائياً.", true); }
+          else { renderOrders(); note(r.error === "طلب غير معروف" ? "الخادم لا يدعم الحذف بعد: حدّث كود Apps Script وأعد النشر (إصدار جديد)." : (r.error || "تعذّر الحذف"), false); }
+        };
+      };
       if (cb) cb.onclick = function () {
         acts.innerHTML = '<div class="msg err" style="margin:0;flex:1 1 100%">هل تريد إلغاء طلب «' + esc(o.jacketName) + '» للطالب ' + esc(o.student) + '؟</div>' +
           '<button class="sm danger" data-y="1">تأكيد الإلغاء</button><button class="sm ghost" data-n="1">تراجع</button>';

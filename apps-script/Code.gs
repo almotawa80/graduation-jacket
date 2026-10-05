@@ -62,6 +62,13 @@ function doPost(e) {
       sh.getRange(r._row, HEAD.indexOf('updatedAt') + 1).setValue(new Date());
       return out_({ ok: true });
     }
+    if (p.action === 'deleteOrder') {
+      var d = rows_().filter(function (o) { return String(o.id) === String(p.id); })[0];
+      if (!d) return out_({ ok: false, error: 'الطلب غير موجود' });
+      if (d.status !== 'cancelled') return out_({ ok: false, error: 'لا يُحذف نهائياً إلا الطلب الملغي' });
+      sheet_().deleteRow(d._row);
+      return out_({ ok: true });
+    }
     if (p.action === 'saveSettings') {
       var n = p.settings || {}, c = {};
       for (var k in DEFAULTS) c[k] = (n[k] !== undefined ? n[k] : s[k]);

@@ -52,6 +52,12 @@
       orders.forEach(function (x) { if (x.id === p.id) { x.status = p.status; x.updatedAt = new Date().toISOString(); } });
       sv("jk_orders", orders); return { ok: true };
     }
+    if (action === "deleteOrder") {
+      var t = orders.filter(function (x) { return x.id === p.id; })[0];
+      if (!t) return { ok: false, error: "الطلب غير موجود" };
+      if (t.status !== "cancelled") return { ok: false, error: "لا يُحذف نهائياً إلا الطلب الملغي" };
+      sv("jk_orders", orders.filter(function (x) { return x.id !== p.id; })); return { ok: true };
+    }
     if (action === "saveSettings") { sv("jk_settings", p.settings); return { ok: true }; }
     return { ok: false, error: "طلب غير معروف" };
   }
