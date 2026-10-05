@@ -13,8 +13,29 @@
     editMsg: "السلام عليكم {student}،\nنأمل تعديل الاسم المكتوب على الجاكيت ({name}) وإعادة إرسال الطلب من نفس الرابط برقم هاتفك نفسه.\nشكراً لك."
   };
   var ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
-  var url = (g.APP_CONFIG && g.APP_CONFIG.API_URL) || "";
-  var demo = !url;
+  var CFG = g.APP_CONFIG || {};
+  var url = CFG.API_URL || "";
+  var sbUrl = (CFG.SUPABASE_URL || "").replace(/\/+$/, ""), sbKey = CFG.SUPABASE_KEY || "";
+  var useSb = !!(sbUrl && sbKey);
+  var demo = !url && !useSb;
+  /* فتح الاتصال بالخادم مبكراً */
+  if (useSb) { try { var l = document.createElement("link"); l.rel = "preconnect"; l.href = sbUrl; l.crossOrigin = ""; document.head.appendChild(l); } catch (e) {} }
+  var RPC = {
+    settings: ["get_settings", function () { return {}; }],
+    submit: ["submit_order", function (p) { return { o: p.order }; }],
+    orders: ["admin_orders", function (p) { return { k: p.key }; }],
+    setStatus: ["admin_set_status", function (p) { return { k: p.key, oid: p.id, st: p.status }; }],
+    deleteOrder: ["admin_delete_order", function (p) { return { k: p.key, oid: p.id }; }],
+    saveSettings: ["admin_save_settings", function (p) { return { k: p.key, s: p.settings }; }]
+  };
+  async function sbCall(action, p) {
+    var m = RPC[action]; if (!m) return { ok: false, error: "طلب غير معروف" };
+    var r = await fetch(sbUrl + "/rest/v1/rpc/" + m[0], { method: "POST",
+      headers: { "Content-Type": "application/json", apikey: sbKey, Authorization: "Bearer " + sbKey }, body: JSON.stringify(m[1](p)) });
+    var j = await r.json();
+    if (!r.ok) return { ok: false, error: (j && j.message) || "تعذّر تنفيذ العملية" };
+    return j;
+  }
 
   var mem = {};
   function ls(k, d) { try { var v = localStorage.getItem(k); if (v) return JSON.parse(v); } catch (e) {} return mem[k] !== undefined ? mem[k] : d; }
@@ -69,6 +90,7 @@
   async function call(action, p) {
     p = p || {};
     if (demo) return mock(action, p);
+    if (useSb) { try { return await sbCall(action, p); } catch (e) { return { ok: false, error: "تعذّر الاتصال بالخادم، تحقق من الإنترنت وأعد المحاولة." }; } }
     try {
       var r;
       if (action === "settings") r = await fetch(url + "?action=settings");
