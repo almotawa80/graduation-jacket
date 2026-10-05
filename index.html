@@ -37,7 +37,7 @@
           <div><label for="student">الاسم الكامل</label><input id="student" type="text" autocomplete="off" required></div>
           <div class="row two">
             <div><label for="grade">الصف</label><input id="grade" type="text" required></div>
-            <div><label for="phone">رقم الهاتف</label><input id="phone" type="tel" inputmode="tel" dir="ltr" style="text-align:right" required></div>
+            <div><label for="phone">رقم الهاتف</label><input id="phone" type="tel" inputmode="numeric" maxlength="14" autocomplete="tel-national" placeholder="8 أرقام" dir="ltr" style="text-align:right" required></div>
           </div>
         </div>
       </div>
@@ -114,6 +114,12 @@
   }
 
   function fail(m) { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  /* رقم الهاتف: أرقام فقط وثمانية بالضبط (يُزال مفتاح 965 عند اللصق) */
+  $("phone").addEventListener("input", function () {
+    var d = API.digits(this.value);
+    if (d.length === 11 && d.indexOf("965") === 0) d = d.slice(3);
+    d = d.slice(0, 8); if (this.value !== d) this.value = d;
+  });
   var FIELDS = { jname: nameEl, student: $("student"), grade: $("grade"), phone: $("phone") };
   function mark(el, bad) { el.setAttribute("aria-invalid", bad ? "true" : "false"); el.classList.toggle("bad", !!bad); }
   Object.keys(FIELDS).forEach(function (k) { FIELDS[k].addEventListener("input", function () { mark(FIELDS[k], false); }); });
@@ -129,7 +135,7 @@
     $("sizes").classList.toggle("bad", noSize);
     need($("student"), "الاسم الكامل", st.length < 3);
     need($("grade"), "الصف", !gr);
-    need($("phone"), ph.length ? "رقم هاتف صحيح" : "رقم الهاتف", ph.length < 8 || ph.length > 15);
+    need($("phone"), ph.length ? "رقم هاتف صحيح (8 أرقام)" : "رقم الهاتف", ph.length !== 8);
     var noOk = !$("ok").checked; if (noOk) { miss.push("تأكيد صحة البيانات"); if (!first) first = $("ok"); }
     if (miss.length) { fail("الناقص: " + miss.join("، ")); if (first && first.focus) first.focus({ preventScroll: true }); return; }
     var b = $("send"); b.disabled = true; b.textContent = "جارٍ الإرسال...";

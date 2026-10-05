@@ -86,7 +86,7 @@ function submit_(o, s) {
   if (!/^[ء-غف-يـ ]+$/.test(jn)) return { ok: false, error: 'الاسم على الجاكيت يجب أن يكون بحروف عربية.' };
   if (jn.length > s.maxChars) return { ok: false, error: 'الاسم أطول من الحد المسموح (' + s.maxChars + ' حروف).' };
   if (s.sizes.indexOf(size) < 0) return { ok: false, error: 'المقاس غير متاح.' };
-  if (st.length < 3 || !gr || ph.length < 8 || ph.length > 15) return { ok: false, error: 'بيانات التحقق غير مكتملة.' };
+  if (st.length < 3 || !gr || ph.length !== 8) return { ok: false, error: 'بيانات التحقق غير مكتملة.' };
   var rows = rows_(), ex = rows.filter(function (r) { return digits_(r.phone) === ph && r.status !== 'cancelled'; })[0], sh = sheet_();
   if (ex) {
     if (ex.status !== 'edit') return { ok: false, error: 'يوجد طلب مسجّل بهذا الرقم مسبقاً. للتعديل تواصل مع المشرف.' };
