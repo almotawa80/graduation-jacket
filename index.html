@@ -4,15 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>طلب جاكيت التخرج</title>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
-<header class="top"><div class="brand"><img src="assets/logo.jpg" alt="شعار مدرسة الرؤية ثنائية اللغة" width="109" height="88"></div><h1 id="title" style="margin-top:12px">جاكيت التخرج</h1><p id="intro"></p></header>
+<header class="top"><div class="brand"><img src="assets/logo.webp" alt="شعار مدرسة الرؤية ثنائية اللغة" width="108" height="88" fetchpriority="high"></div><h1 id="title" style="margin-top:12px">جاكيت التخرج</h1><p id="intro"></p></header>
 <main>
   <div id="closed" class="card msg info" hidden></div>
-  <div id="app" class="layout" hidden>
+  <div id="app" class="layout">
     <section class="stage-card card" id="stageCard" aria-label="معاينة الجاكيت">
       <div class="stage" id="jacket"></div>
       <div class="namefield">
@@ -49,21 +54,18 @@
 <script src="assets/api.js"></script>
 <script src="assets/jacket.js"></script>
 <script>
-(async function () {
+(function () {
   var $ = function (id) { return document.getElementById(id); };
   if (API.demo) $("demo").hidden = false;
-  var S = API.DEFAULTS;
-  var r = await API.call("settings");
-  if (r.ok) S = Object.assign({}, S, r.settings);
-  $("title").textContent = S.title; $("intro").textContent = S.intro; document.title = S.title;
-  if (!S.open) { var c = $("closed"); c.textContent = S.closedMessage; c.hidden = false; return; }
-  $("app").hidden = false;
-  await Promise.all([document.fonts.load('90px "Foda Display"'), document.fonts.load('800 90px "Jacket Num"')]).catch(function () {});
+
+  /* الصفحة تظهر فوراً بآخر إعدادات محفوظة (أو الافتراضية)، ثم تُحدَّث عند وصول رد الخادم */
+  var S = Object.assign({}, API.DEFAULTS);
+  try { Object.assign(S, JSON.parse(localStorage.getItem("jk_pub") || "{}")); } catch (e) {}
+
+  var nameEl = $("jname"), card = $("stageCard"), form = $("form"), err = $("err");
   var svg = Jacket.mount($("jacket"));
-  var max = +S.maxChars || 8;
-  var nameEl = $("jname");
-  nameEl.maxLength = max;
-  /* حروف عربية ومسافة فقط */
+  var max = 8;
+
   function clean(v) { return v.replace(/[^ء-غف-يـ ]/g, "").replace(/\s{2,}/g, " ").slice(0, max); }
   function upd() {
     var v = clean(nameEl.value);
@@ -71,8 +73,35 @@
     $("cnt").textContent = v.length + " / " + max;
     Jacket.update(svg, v.trim() || "اسمك", S.number);
   }
-  nameEl.addEventListener("input", upd); upd();
-  var card = $("stageCard");
+  function renderSizes() {
+    var cur = (form.querySelector("input[name=size]:checked") || {}).value;
+    $("sizes").innerHTML = S.sizes.map(function (z) {
+      return '<label class="chip"><input type="radio" name="size" value="' + z + '"' + (z === cur ? " checked" : "") + '><span>' + z + '</span></label>';
+    }).join("");
+  }
+  function apply() {
+    $("title").textContent = S.title; $("intro").textContent = S.intro; document.title = S.title;
+    max = +S.maxChars || 8; nameEl.maxLength = max;
+    renderSizes(); upd();
+    var open = !!S.open;
+    $("closed").textContent = S.closedMessage; $("closed").hidden = open;
+    if (!$("done").hidden) return;
+    $("app").hidden = !open;
+  }
+  apply();
+  $("app").hidden = !S.open;
+
+  /* إعادة ضبط الاسم بعد وصول الخط (لتناسب العرض) */
+  if (document.fonts) { document.fonts.addEventListener("loadingdone", upd); document.fonts.ready.then(upd); }
+
+  var settingsReady = API.call("settings").then(function (r) {
+    if (!r.ok) return;
+    S = Object.assign({}, S, r.settings);
+    try { localStorage.setItem("jk_pub", JSON.stringify(r.settings)); } catch (e) {}
+    apply();
+  });
+
+  nameEl.addEventListener("input", upd);
   nameEl.addEventListener("focus", function () { card.classList.add("typing"); Jacket.show(svg, "back"); });
   nameEl.addEventListener("blur", function () { card.classList.remove("typing"); });
   nameEl.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); nameEl.blur(); } });
@@ -82,22 +111,24 @@
     var pin = function () { card.style.transform = window.innerWidth < 860 && vv.offsetTop > 0 ? "translateY(" + vv.offsetTop + "px)" : ""; };
     vv.addEventListener("resize", pin); vv.addEventListener("scroll", pin);
   }
-  $("sizes").innerHTML = S.sizes.map(function (z, i) {
-    return '<label class="chip"><input type="radio" name="size" value="' + z + '"' + (i === 0 ? "" : "") + '><span>' + z + '</span></label>';
-  }).join("");
-  var form = $("form"), err = $("err");
+
   function fail(m) { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: "center", behavior: "smooth" }); }
   form.addEventListener("submit", async function (e) {
     e.preventDefault(); err.hidden = true;
+    var b = $("send"); b.disabled = true; b.textContent = "جارٍ التحقق...";
+    await settingsReady;                      /* يضمن استخدام أحدث إعدادات المقاسات والحروف */
+    b.disabled = false; b.textContent = "إرسال الطلب";
+    if (!S.open) return fail(S.closedMessage);
     var jn = nameEl.value.trim(), size = (form.querySelector("input[name=size]:checked") || {}).value;
     var st = $("student").value.trim(), gr = $("grade").value.trim(), ph = API.digits($("phone").value);
     if (!jn) return fail("اكتب الاسم الذي يظهر على الجاكيت.");
+    if (jn.length > max) return fail("الاسم أطول من الحد المسموح (" + max + " حروف).");
     if (!size) return fail("اختر المقاس.");
     if (st.length < 3) return fail("اكتب اسمك الكامل.");
     if (!gr) return fail("اكتب الصف.");
     if (ph.length < 8 || ph.length > 15) return fail("رقم الهاتف غير صحيح.");
     if (!$("ok").checked) return fail("أكّد صحة البيانات قبل الإرسال.");
-    var b = $("send"); b.disabled = true; b.textContent = "جارٍ الإرسال...";
+    b.disabled = true; b.textContent = "جارٍ الإرسال...";
     var res = await API.call("submit", { order: { jacketName: jn, size: size, student: st, grade: gr, phone: ph } });
     b.disabled = false; b.textContent = "إرسال الطلب";
     if (!res.ok) return fail(res.error || "تعذّر إرسال الطلب.");

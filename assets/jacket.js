@@ -18,14 +18,12 @@
      '<radialGradient id="' + p + 'hood" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#34408f"/><stop offset=".6" stop-color="#232b67"/><stop offset="1" stop-color="#141943"/></radialGradient>' +
      '<linearGradient id="' + p + 'lin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6edcc"/><stop offset="1" stop-color="#d6c692"/></linearGradient>' +
      '<pattern id="' + p + 'rib" width="8" height="10" patternUnits="userSpaceOnUse"><rect width="3" height="10" fill="#fff" opacity=".08"/></pattern>' +
-     '<filter id="' + p + 'sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0b0e2a" flood-opacity=".28"/></filter>' +
-     '<filter id="' + p + 'bl" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="7"/></filter>' +
-     '<filter id="' + p + 'pr" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1.5" stdDeviation="1" flood-color="#000" flood-opacity=".45"/></filter>' +
+     '<radialGradient id="' + p + 'fl"><stop offset="0" stop-color="#141943" stop-opacity=".34"/><stop offset=".6" stop-color="#141943" stop-opacity=".14"/><stop offset="1" stop-color="#141943" stop-opacity="0"/></radialGradient>' +
     '</defs>';
   }
 
   function common(p) {
-    return '<ellipse cx="300" cy="640" rx="215" ry="15" fill="#141943" opacity=".22" filter="url(#' + p + 'bl)"/>';
+    return '<ellipse cx="300" cy="642" rx="240" ry="22" fill="url(#' + p + 'fl)"/>';
   }
 
   function sleeves(p) {
@@ -45,7 +43,7 @@
 
   function backSvg(p) {
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" role="img" aria-label="ظهر جاكيت التخرج">' + defs(p) + common(p) +
-      '<g filter="url(#' + p + 'sh)">' +
+      '<g>' +
         '<ellipse cx="298" cy="54" rx="56" ry="18" fill="url(#' + p + 'lin)"/>' +
         '<path d="' + BODY + '" fill="url(#' + p + 'body)"/>' + hem(p) + sleeves(p) +
         '<path d="M198 214 C240 238 360 238 402 214 C404 250 350 262 300 262 C250 262 196 250 198 214 Z" fill="#0b0e2a" opacity=".3"/>' +
@@ -53,7 +51,7 @@
       '</g>' + folds() +
       '<g fill="none" stroke="#4a56a8" stroke-width="2" opacity=".5" stroke-linecap="round"><path d="M298 68 C294 120 302 180 294 226"/><path d="M200 214 C186 235 176 262 172 300"/><path d="M400 214 C414 235 424 262 428 300"/></g>' +
       '<ellipse cx="300" cy="120" rx="52" ry="34" fill="#fff" opacity=".07"/>' +
-      '<g filter="url(#' + p + 'pr)">' +
+      '<g>' +
         '<text class="jName" x="300" y="284" text-anchor="middle" direction="rtl" fill="' + BEIGE + '" style="font-family:\'Foda Display\',serif" font-size="86"></text>' +
         '<text class="jNum" x="300" y="442" text-anchor="middle" fill="' + BEIGE + '" style="font-family:\'Jacket Num\',serif;font-weight:800" font-size="150"></text>' +
       '</g></svg>';
@@ -61,7 +59,7 @@
 
   function frontSvg(p) {
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" role="img" aria-label="أمام جاكيت التخرج">' + defs(p) + common(p) +
-      '<g filter="url(#' + p + 'sh)">' +
+      '<g>' +
         '<path d="M190 214 C176 160 196 84 250 56 C275 46 325 46 350 56 C404 84 424 160 410 214 Z" fill="url(#' + p + 'hood)"/>' +
         '<path d="' + BODY + '" fill="url(#' + p + 'body)"/>' + hem(p) +
         /* جيب الكنغر */
@@ -78,7 +76,7 @@
       '<g fill="none" stroke="#e7dbb4" stroke-width="5" stroke-linecap="round"><path d="M272 248 C268 290 272 330 268 372"/><path d="M296 252 C294 292 300 334 296 366"/></g>' +
       '<g fill="#8f875f"><rect x="264" y="370" width="8" height="16" rx="3"/><rect x="292" y="364" width="8" height="16" rx="3"/></g>' +
       /* شعار المدرسة على الصدر الأيسر للابس */
-      '<g filter="url(#' + p + 'pr)"><image href="assets/logo-chest.png" x="322" y="266" width="80" height="65" preserveAspectRatio="xMidYMid meet"/></g>' +
+      '<g><image href="assets/logo-chest.webp" x="322" y="266" width="80" height="65" preserveAspectRatio="xMidYMid meet"/></g>' +
       '</svg>';
   }
 
@@ -86,10 +84,10 @@
     var p = "j" + (++seq) + "-";
     el.innerHTML = '<div class="jwrap" data-view="back">' +
       '<div class="jview jv-back">' + backSvg(p + "b-") + '</div>' +
-      '<div class="jview jv-front">' + frontSvg(p + "f-") + '</div>' +
+      '<div class="jview jv-front"></div>' +
       '<div class="jtoggle" role="group" aria-label="وجه الجاكيت"><button type="button" data-v="back" aria-pressed="true">الخلف</button><button type="button" data-v="front" aria-pressed="false">الأمام</button></div>' +
       '</div>';
-    var wrap = el.querySelector(".jwrap");
+    var wrap = el.querySelector(".jwrap"); wrap.__p = p;
     wrap.addEventListener("click", function (e) {
       var b = e.target.closest && e.target.closest("button[data-v]"); if (b) show(wrap, b.getAttribute("data-v"));
     });
@@ -99,6 +97,7 @@
   function show(node, view) {
     var wrap = node.closest ? node.closest(".jwrap") : node;
     if (!wrap) return;
+    if (view === "front" && !wrap.__front) { wrap.__front = true; wrap.querySelector(".jv-front").innerHTML = frontSvg(wrap.__p + "f-"); }
     wrap.setAttribute("data-view", view);
     wrap.querySelectorAll(".jtoggle button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === view)); });
   }

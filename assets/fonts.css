@@ -1,4 +1,4 @@
-@font-face{font-family:"Foda Display";src:url("foda.ttf") format("truetype");font-display:block}
-@font-face{font-family:"Jacket Num";src:url("bodoni.woff2") format("woff2");font-weight:800;font-display:block}
+@font-face{font-family:"Foda Display";src:url("foda.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Jacket Num";src:url("bodoni-digits.woff2") format("woff2");font-weight:800;font-display:swap}
 @font-face{font-family:"Tajawal";src:url("tajawal-400.woff2") format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Tajawal";src:url("tajawal-700.woff2") format("woff2");font-weight:700;font-display:swap}
