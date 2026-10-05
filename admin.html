@@ -16,32 +16,37 @@
   <form id="login" class="card login">
     <label for="pw">كلمة المرور</label>
     <input id="pw" type="password" autocomplete="current-password" required>
+    <label class="check" style="margin-top:10px;padding:8px 12px"><input type="checkbox" id="rem" checked><span>تذكّر هذا الجهاز</span></label>
     <div id="lerr" class="msg err" hidden></div>
     <button class="block" style="margin-top:12px">دخول</button>
     <p style="text-align:center;margin:14px 0 0"><a href="index.html">← العودة إلى صفحة الطلب</a></p>
   </form>
 
   <div id="panel" hidden>
-    <div class="tabs">
-      <button class="sm" id="tOrders">الطلبات</button>
-      <button class="sm ghost" id="tSettings">الإعدادات</button>
-      <button class="sm ghost" id="refresh">تحديث</button>
-      <button class="sm ghost" id="logout">خروج</button>
-      <a class="btn sm ghost" href="index.html" style="margin-inline-start:auto">← صفحة الطلب</a>
+    <div class="adminbar">
+      <div class="seg" role="group" aria-label="أقسام اللوحة">
+        <button type="button" id="tOrders" aria-pressed="true">الطلبات</button>
+        <button type="button" id="tSettings" aria-pressed="false">الإعدادات</button>
+      </div>
+      <div class="barlinks">
+        <button type="button" class="lnk" id="refresh" title="تحديث البيانات">↻ تحديث</button>
+        <a class="lnk" href="index.html">↗ صفحة الطلب</a>
+        <button type="button" class="lnk" id="logout">خروج</button>
+      </div>
     </div>
 
     <div id="note" class="msg err" role="status" hidden></div>
     <section id="vOrders">
-      <div class="subtabs" role="group" aria-label="قوائم الطلبات">
-        <button class="sm" id="vActive" type="button" aria-pressed="true">الطلبات النشطة <span class="cnt" id="nActive">0</span></button>
-        <button class="sm ghost" id="vCanc" type="button" aria-pressed="false">الطلبات الملغاة <span class="cnt" id="nCanc">0</span></button>
+      <div class="seg seg2" role="group" aria-label="قوائم الطلبات">
+        <button id="vActive" type="button" aria-pressed="true">النشطة <span class="cnt" id="nActive">0</span></button>
+        <button id="vCanc" type="button" aria-pressed="false">الملغاة <span class="cnt" id="nCanc">0</span></button>
       </div>
       <div class="stats" id="stats"></div>
       <div class="sizes" id="sizeSum"></div>
       <div class="tools">
         <input id="q" type="text" placeholder="بحث بالاسم أو الهاتف أو الصف">
         <select id="fs"><option value="">كل الحالات</option><option value="new">جديد</option><option value="approved">معتمد</option><option value="edit">بانتظار تعديل</option></select>
-        <button class="sm ghost" id="csv">تصدير Excel</button>
+        <button type="button" class="lnk boxed" id="csv">⬇ تصدير Excel</button>
       </div>
       <div id="list" class="orders"></div>
     </section>
@@ -91,13 +96,13 @@
     var r = await load();
     btn.disabled = false; btn.textContent = "دخول";
     if (!r.ok) { $("panel").hidden = true; $("login").hidden = false; $("lerr").textContent = r.error || "تعذّر الدخول"; $("lerr").hidden = false; return; }
-    try { sessionStorage.setItem("jk_key", KEY); } catch (x) {}
+    try { sessionStorage.setItem("jk_key", KEY); if ($("rem").checked) localStorage.setItem("jk_key", KEY); else localStorage.removeItem("jk_key"); } catch (x) {}
     show();
   });
   function show() { $("login").hidden = true; $("panel").hidden = false; renderOrders(); fillSettings(); }
-  $("logout").onclick = function () { try { sessionStorage.removeItem("jk_key"); } catch (x) {} location.reload(); };
-  $("refresh").onclick = async function () { await load(); renderOrders(); };
-  function tab(o) { $("vOrders").hidden = !o; $("vSettings").hidden = o; $("tOrders").className = "sm" + (o ? "" : " ghost"); $("tSettings").className = "sm" + (o ? " ghost" : ""); }
+  $("logout").onclick = function () { try { sessionStorage.removeItem("jk_key"); localStorage.removeItem("jk_key"); } catch (x) {} location.reload(); };
+  $("refresh").onclick = async function () { var r = await load(); if (r.ok) { renderOrders(); fillSettings(); } else note(r.error || "تعذّر التحديث", false); };
+  function tab(o) { $("vOrders").hidden = !o; $("vSettings").hidden = o; $("tOrders").setAttribute("aria-pressed", String(o)); $("tSettings").setAttribute("aria-pressed", String(!o)); }
   $("tOrders").onclick = function () { tab(true); }; $("tSettings").onclick = function () { tab(false); };
 
   function waLink(o, kind) {
@@ -110,7 +115,6 @@
   var VIEW = "active";
   function setView(v) {
     VIEW = v;
-    $("vActive").className = "sm" + (v === "active" ? "" : " ghost"); $("vCanc").className = "sm" + (v === "cancelled" ? "" : " ghost");
     $("vActive").setAttribute("aria-pressed", String(v === "active")); $("vCanc").setAttribute("aria-pressed", String(v === "cancelled"));
     $("fs").hidden = v === "cancelled"; $("fs").value = "";
     renderOrders();
@@ -139,10 +143,10 @@
         '<div class="meta">الصف: ' + esc(o.grade) + ' · المقاس: <b>' + esc(o.size) + '</b> · #' + o.id + '</div>' +
         '<div class="meta" dir="ltr" style="text-align:right">' + esc(o.phone) + '</div>' +
         '<div class="acts">' + (o.status === "cancelled"
-          ? '<button class="sm ghost" data-r="1">استعادة الطلب</button><button class="sm ghost danger-o" data-d="1">حذف نهائي</button>'
-          : '<a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">اعتماد (واتساب)</a>' +
-            '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">طلب تعديل (واتساب)</a>' +
-            '<button class="sm ghost" data-c="1">إلغاء الطلب</button>') + '</div>';
+          ? '<button class="sm ghost" data-r="1">استعادة الطلب</button><button class="lnk dng" data-d="1">حذف نهائي</button>'
+          : '<a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">✓ اعتماد</a>' +
+            '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">✎ طلب تعديل</a>' +
+            '<button class="lnk dng" data-c="1">إلغاء الطلب</button>') + '</div>';
       d.querySelectorAll("a[data-a]").forEach(function (a) {
         a.href = waLink(o, a.dataset.a);
         a.addEventListener("click", function () { setStatus(o.id, a.dataset.a); });
@@ -197,10 +201,18 @@
     if (r.ok) SET = Object.assign({}, SET, s);
   });
 
-  try { var k = sessionStorage.getItem("jk_key"); if (k) { KEY = k;
-    /* جلسة محفوظة: أظهر اللوحة فوراً بدل شاشة الدخول، وارجع للدخول فقط إن فشل التحقق */
-    $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
-    load().then(function (r) { if (r.ok) show(); else { $("panel").hidden = true; $("login").hidden = false; } }); } } catch (x) {}
+  /* استعادة الجلسة بعد تحديث الصفحة: لا نعود لشاشة الدخول إلا إذا رفض الخادم كلمة المرور فعلاً */
+  (async function restore() {
+    var k = null; try { k = sessionStorage.getItem("jk_key") || localStorage.getItem("jk_key"); } catch (x) {}
+    if (!k) return;
+    KEY = k; $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
+    var r;
+    for (var i = 0; i < 3; i++) { r = await load(); if (r.ok || !/تعذّر الاتصال/.test(r.error || "")) break; await new Promise(function (z) { setTimeout(z, 1200); }); }
+    if (r.ok) { show(); return; }
+    if (/تعذّر الاتصال/.test(r.error || "")) { $("list").innerHTML = ""; note("تعذّر الاتصال بالخادم. اضغط «تحديث» لإعادة المحاولة.", false); return; }
+    try { sessionStorage.removeItem("jk_key"); localStorage.removeItem("jk_key"); } catch (x) {}
+    $("panel").hidden = true; $("login").hidden = false;
+  })();
 })();
 </script>
 </body>

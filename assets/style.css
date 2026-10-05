@@ -111,3 +111,24 @@ input.bad{box-shadow:0 0 0 3px rgba(179,38,30,.15)}
 .foot a{color:var(--mut);font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:6px 16px;background:var(--card);display:inline-block}
 .foot a:hover{color:var(--navy);border-color:var(--navy)}
 .foot a:focus-visible{outline:3px solid var(--beige);outline-offset:2px}
+
+/* لوحة المدير: شريط علوي مرتب */
+.adminbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.barlinks{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.seg{display:inline-flex;background:#e3e7f3;border-radius:12px;padding:3px;gap:2px}
+.seg button{background:transparent;color:var(--mut);border-radius:9px;padding:8px 18px;box-shadow:none;transform:none;font-size:16px}
+.seg button:hover:not(:disabled){background:rgba(255,255,255,.6);transform:none;box-shadow:none;color:var(--navy)}
+.seg button[aria-pressed="true"],.seg button[aria-pressed="true"]:hover:not(:disabled){background:var(--navy);color:var(--beige);box-shadow:0 4px 10px -6px var(--navy)}
+.seg .cnt{display:inline-block;min-width:22px;padding:0 6px;margin-inline-start:4px;border-radius:99px;background:rgba(0,0,0,.08);font-size:13px}
+.seg button[aria-pressed="true"] .cnt{background:rgba(255,255,255,.22)}
+.seg2{margin-bottom:12px}
+.lnk{background:transparent;border:0;color:var(--mut);font:inherit;font-size:15px;font-weight:400;padding:6px 10px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block;box-shadow:none;transform:none}
+.lnk:hover:not(:disabled){background:#e3e7f3;color:var(--navy);transform:none;box-shadow:none}
+.lnk.boxed{border:1.5px solid var(--line);background:#fff;color:var(--navy);font-weight:700;padding:10px 14px;border-radius:12px;flex:none}
+.lnk.dng{color:var(--bad)}
+.lnk.dng:hover:not(:disabled){background:#fde8e6;color:var(--bad)}
+.order .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.order .acts .lnk{grid-column:1/-1;justify-self:start;padding:4px 6px;font-size:14px}
+.order .acts .msg{grid-column:1/-1}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:520px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.seg button{padding:8px 14px}}
