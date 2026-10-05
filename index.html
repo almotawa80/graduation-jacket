@@ -9,15 +9,16 @@
 <link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005d">
-<link rel="stylesheet" href="assets/style.css?v=20261005d">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005e">
+<link rel="stylesheet" href="assets/style.css?v=20261005e">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
 <header class="top"><div class="hd"><div class="brand"><img src="assets/logo.webp" alt="شعار مدرسة الرؤية ثنائية اللغة" width="108" height="88" fetchpriority="high"></div><div class="ht"><h1 id="title">جاكيت التخرج</h1><p id="intro"></p></div></div></header>
 <main>
   <div id="closed" class="card msg info" hidden></div>
-  <div id="app" class="layout">
+  <div class="stepbar" id="stepbar" aria-hidden="true"><span class="on" id="sb1"><i>1</i> الاسم</span><span id="sb2"><i>2</i> البيانات</span></div>
+  <div id="app" class="layout" data-step="1">
     <section class="stage-card card" id="stageCard" aria-label="معاينة الجاكيت">
       <div class="namefield">
         <label for="jname" class="stephead" style="margin-bottom:8px"><span class="n">1</span><h2>الاسم أو الختم على الجاكيت</h2></label>
@@ -25,8 +26,10 @@
         <div class="counter"><span>حروف عربية فقط</span><span id="cnt"></span></div>
       </div>
       <div class="stage" id="jacket"></div>
+      <button type="button" id="nextBtn" class="block nextbtn">التالي: المقاس والبيانات</button>
     </section>
     <form id="form" class="card" novalidate autocomplete="off">
+      <div class="minisum" id="minisum"><div class="mj" id="miniJ"></div><div class="mt"><span>الاسم على الجاكيت</span><b id="miniName">—</b></div><button type="button" class="lnk" id="editName" data-ic="pencil">تعديل</button></div>
       <div class="sect">
         <div class="stephead"><span class="n">2</span><h2>المقاس</h2></div>
         <div class="chips" id="sizes"></div>
@@ -55,10 +58,10 @@
   <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
 </div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
-<script src="assets/config.js?v=20261005d"></script>
-<script src="assets/icons.js?v=20261005d"></script>
-<script src="assets/api.js?v=20261005d"></script>
-<script src="assets/jacket.js?v=20261005d"></script>
+<script src="assets/config.js?v=20261005e"></script>
+<script src="assets/icons.js?v=20261005e"></script>
+<script src="assets/api.js?v=20261005e"></script>
+<script src="assets/jacket.js?v=20261005e"></script>
 <script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
@@ -120,11 +123,27 @@
   nameEl.addEventListener("input", upd);
   nameEl.addEventListener("focus", function () { card.classList.add("typing"); Jacket.show(svg, "back"); });
   nameEl.addEventListener("blur", function () { card.classList.remove("typing"); });
-  nameEl.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); nameEl.blur(); } });
+  /* جوال: خطوتان (الاسم ثم البيانات) حتى لا تزاحم المعاينة الحقول */
+  var appEl = $("app"), miniSvg = Jacket.mount($("miniJ"));
+  var isMobile = function () { return window.matchMedia && window.matchMedia("(max-width:859px)").matches; };
+  function setStep(n) {
+    appEl.setAttribute("data-step", n); document.body.classList.toggle("step1", n === 1);
+    $("sb1").classList.toggle("on", n === 1); $("sb2").classList.toggle("on", n === 2);
+    if (n === 2) { var v = nameEl.value.trim(); $("miniName").textContent = v; Jacket.update(miniSvg, v, S.number); }
+    window.scrollTo(0, 0);
+  }
+  document.body.classList.add("step1");
+  $("nextBtn").addEventListener("click", function () {
+    if (!nameEl.value.trim()) { mark(nameEl, true); nameEl.focus(); return; }
+    mark(nameEl, false); setStep(2);
+    var st = $("student"); setTimeout(function () { try { st.focus({ preventScroll: true }); } catch (e) {} }, 0);
+  });
+  $("editName").addEventListener("click", function () { setStep(1); nameEl.focus(); });
+  nameEl.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); nameEl.blur(); if (isMobile() && nameEl.value.trim()) $("nextBtn").click(); } });
   /* إبقاء المعاينة داخل المنطقة المرئية عند ظهور لوحة المفاتيح (آيفون) */
   if (window.visualViewport) {
     var vv = window.visualViewport;
-    var pin = function () { card.style.transform = window.innerWidth < 860 && vv.offsetTop > 0 ? "translateY(" + vv.offsetTop + "px)" : ""; };
+    var pin = function () { card.style.transform = false ? "translateY(" + vv.offsetTop + "px)" : ""; };
     vv.addEventListener("resize", pin); vv.addEventListener("scroll", pin);
   }
 
@@ -153,7 +172,7 @@
     need($("grade"), "الصف", !gr);
     need($("phone"), ph.length ? "رقم هاتف صحيح (8 أرقام)" : "رقم الهاتف", ph.length !== 8);
     var noOk = !$("ok").checked; if (noOk) { miss.push("تأكيد صحة البيانات"); if (!first) first = $("ok"); }
-    if (miss.length) { fail("الناقص: " + miss.join("، ")); if (first && first.focus) first.focus({ preventScroll: true }); return; }
+    if (miss.length) { fail("الناقص: " + miss.join("، ")); if (first === nameEl && isMobile()) setStep(1); if (first && first.focus) first.focus({ preventScroll: true }); return; }
     var b = $("send"); b.disabled = true; b.innerHTML = '<span class="spin"></span>جارٍ الإرسال…';
     await settingsReady;                      /* يضمن استخدام أحدث إعدادات المقاسات والحروف */
     if (!S.open) { b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب"; return fail(S.closedMessage); }

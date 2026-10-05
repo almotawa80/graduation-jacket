@@ -258,3 +258,32 @@ body.is-done{padding-bottom:0}
 .done .nx{text-align:right;margin:14px 0 0}
 [hidden]{display:none!important}
 .done .jtoggle{display:none}
+
+/* ===== جوال: خطوتان ===== */
+.stepbar,.minisum,.nextbtn{display:none}
+@media(max-width:859px){
+  .stepbar{display:flex;gap:8px;margin:2px 0 12px}
+  .stepbar span{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:99px;background:#e3e7f3;color:var(--mut);font-weight:700;font-size:14px;transition:background .25s,color .25s}
+  .stepbar span i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--navy);font-size:13px}
+  .stepbar span.on{background:var(--navy);color:var(--beige)}
+  .stepbar span.on i{background:var(--beige);color:var(--navy)}
+  #app[data-step="1"] #form{display:none}
+  #app[data-step="2"] .stage-card{display:none}
+  .stage-card{position:static!important;margin-inline:0;border-radius:18px;box-shadow:0 10px 30px -22px rgba(20,24,56,.45);padding:18px}
+  .stage svg{max-height:46vh}
+  .stage-card .jtoggle{margin-top:8px}
+  .nextbtn{display:flex;margin-top:12px}
+  body.step1 .sendbar{display:none!important}
+  body.step1{padding-bottom:0}
+  #app[data-step="2"] .minisum{display:flex}
+  .minisum{align-items:center;gap:12px;background:var(--beige-l);border-radius:14px;padding:8px 12px;margin:0 0 16px}
+  .minisum .mj{flex:none;width:58px}
+  .minisum .mj .jtoggle{display:none}
+  .minisum .mj svg{max-height:none;width:58px;height:auto}
+  .minisum .mt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+  .minisum .mt span{font-size:13px;color:var(--mut)}
+  .minisum .mt b{font-family:"Foda Display","Tajawal",serif;font-size:24px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+button.nextbtn{display:none}
+@media(max-width:859px){button.nextbtn{display:flex}}
