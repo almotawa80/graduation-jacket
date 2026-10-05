@@ -22,10 +22,10 @@
     c.fillStyle = halo; c.fillRect(0, jy - 40, W, jh + 80);
     if (res[0]) c.drawImage(res[0], jx, jy, jw, jh);
     c.fillStyle = BEIGE;
-    var name = o.name || "", nSize = fitText(c, name, 240 * s, 92 * s, 38 * s, '"Foda Display"', "");
-    c.font = nSize + 'px "Foda Display"'; c.fillText(name, W / 2, jy + 408 * s);
-    var num = String(o.number || ""), dSize = fitText(c, num, 190 * s, 150 * s, 60 * s, '"Jacket Num"', "800");
-    c.font = "800 " + dSize + 'px "Jacket Num"'; c.fillText(num, W / 2, jy + 556 * s);
+    var name = o.name || "", nSize = fitText(c, name, 240 * s, 88 * s, 38 * s, '"Foda Display"', "");
+    c.font = nSize + 'px "Foda Display"'; c.fillText(name, W / 2, jy + 386 * s);
+    var num = String(o.number || ""), dSize = fitText(c, num, 160 * s, 126 * s, 54 * s, '"Jacket Num"', "800");
+    c.font = "800 " + dSize + 'px "Jacket Num"'; c.fillText(num, W / 2, jy + 552 * s);
     /* التفاصيل */
     var y = jy + jh + 30;
     c.fillStyle = GOLD; c.font = "700 64px Tajawal"; c.fillText("طلب رقم " + o.id, W / 2, y + 20);

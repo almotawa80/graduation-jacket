@@ -8,8 +8,8 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + VB + ' role="img" aria-label="ظهر جاكيت التخرج">' +
       '<image href="assets/hoodie-back.webp" x="0" y="0" width="600" height="782"/>' +
       '<g>' +
-        '<text class="jName" x="300" y="408" text-anchor="middle" direction="rtl" fill="' + BEIGE + '" style="font-family:\'Foda Display\',serif" font-size="86"></text>' +
-        '<text class="jNum" x="300" y="556" text-anchor="middle" fill="' + BEIGE + '" style="font-family:\'Jacket Num\',serif;font-weight:800" font-size="150"></text>' +
+        '<text class="jName" x="300" y="386" text-anchor="middle" direction="rtl" fill="' + BEIGE + '" style="font-family:\'Foda Display\',serif" font-size="86"></text>' +
+        '<text class="jNum" x="300" y="552" text-anchor="middle" fill="' + BEIGE + '" style="font-family:\'Jacket Num\',serif;font-weight:800" font-size="126"></text>' +
       '</g></svg>';
   }
   function frontSvg() {
@@ -60,8 +60,8 @@
     var n = svg.querySelector(".jName"), d = svg.querySelector(".jNum");
     if (n.textContent !== (name || "")) { n.classList.remove("jin"); void n.getBoundingClientRect(); n.classList.add("jin"); }
     n.textContent = name || ""; d.textContent = number || "";
-    fit(n, 240, 92, 38);
-    fit(d, 190, 150, 60);
+    fit(n, 240, 88, 38);
+    fit(d, 160, 126, 54);
   }
 
   global.Jacket = { mount: mount, update: update, show: show };
