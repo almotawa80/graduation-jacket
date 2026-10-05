@@ -18,20 +18,20 @@
     <input id="pw" type="password" autocomplete="current-password" required>
     <label class="check" style="margin-top:10px;padding:8px 12px"><input type="checkbox" id="rem" checked><span>تذكّر هذا الجهاز</span></label>
     <div id="lerr" class="msg err" hidden></div>
-    <button class="block" style="margin-top:12px">دخول</button>
-    <p style="text-align:center;margin:14px 0 0"><a href="index.html">← العودة إلى صفحة الطلب</a></p>
+    <button class="block" data-ic="logout" style="margin-top:12px">دخول</button>
+    <p style="text-align:center;margin:14px 0 0"><a class="lnk" data-ic="home" href="index.html">العودة إلى صفحة الطلب</a></p>
   </form>
 
   <div id="panel" hidden>
     <div class="adminbar">
       <div class="seg" role="group" aria-label="أقسام اللوحة">
-        <button type="button" id="tOrders" aria-pressed="true">الطلبات</button>
-        <button type="button" id="tSettings" aria-pressed="false">الإعدادات</button>
+        <button type="button" id="tOrders" data-ic="list" aria-pressed="true">الطلبات</button>
+        <button type="button" id="tSettings" data-ic="gear" aria-pressed="false">الإعدادات</button>
       </div>
       <div class="barlinks">
-        <button type="button" class="lnk" id="refresh" title="تحديث البيانات">↻ تحديث</button>
-        <a class="lnk" href="index.html">↗ صفحة الطلب</a>
-        <button type="button" class="lnk" id="logout">خروج</button>
+        <button type="button" class="lnk" id="refresh" data-ic="refresh" title="تحديث البيانات">تحديث</button>
+        <a class="lnk" data-ic="external" href="index.html">صفحة الطلب</a>
+        <button type="button" class="lnk" id="logout" data-ic="logout">خروج</button>
       </div>
     </div>
 
@@ -46,7 +46,7 @@
       <div class="tools">
         <input id="q" type="text" placeholder="بحث بالاسم أو الهاتف أو الصف">
         <select id="fs"><option value="">كل الحالات</option><option value="new">جديد</option><option value="approved">معتمد</option><option value="edit">بانتظار تعديل</option></select>
-        <button type="button" class="lnk boxed" id="csv">⬇ تصدير Excel</button>
+        <button type="button" class="lnk boxed" id="csv" data-ic="download">تصدير Excel</button>
       </div>
       <div id="list" class="orders"></div>
     </section>
@@ -66,11 +66,12 @@
         <fieldset><label for="s_ap">رسالة الاعتماد</label><textarea id="s_ap" rows="4"></textarea><div class="hint">المتغيرات: {student} اسم الطالب، {name} الاسم على الجاكيت، {size} المقاس</div></fieldset>
         <fieldset><label for="s_ed">رسالة طلب تعديل الاسم</label><textarea id="s_ed" rows="4"></textarea></fieldset>
         <div id="sres" class="msg ok" hidden></div>
-        <button class="block">حفظ الإعدادات</button>
+        <button class="block" data-ic="check">حفظ الإعدادات</button>
       </form>
     </section>
   </div>
 </main>
+<script src="assets/icons.js"></script>
 <script src="assets/config.js"></script>
 <script src="assets/api.js"></script>
 <script>
@@ -90,18 +91,18 @@
   }
   $("login").addEventListener("submit", async function (e) {
     e.preventDefault(); KEY = $("pw").value;
-    var btn = $("login").querySelector("button"); btn.disabled = true; btn.textContent = "جارٍ الدخول…"; $("lerr").hidden = true;
+    var btn = $("login").querySelector("button"); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>جارٍ الدخول…'; $("lerr").hidden = true;
     /* إظهار اللوحة فوراً أثناء انتظار الخادم، والرجوع لشاشة الدخول إن كانت الكلمة خاطئة */
     $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
     var r = await load();
-    btn.disabled = false; btn.textContent = "دخول";
+    btn.disabled = false; btn.innerHTML = IC("logout") + "دخول";
     if (!r.ok) { $("panel").hidden = true; $("login").hidden = false; $("lerr").textContent = r.error || "تعذّر الدخول"; $("lerr").hidden = false; return; }
     try { sessionStorage.setItem("jk_key", KEY); if ($("rem").checked) localStorage.setItem("jk_key", KEY); else localStorage.removeItem("jk_key"); } catch (x) {}
     show();
   });
   function show() { $("login").hidden = true; $("panel").hidden = false; renderOrders(); fillSettings(); }
   $("logout").onclick = function () { try { sessionStorage.removeItem("jk_key"); localStorage.removeItem("jk_key"); } catch (x) {} location.reload(); };
-  $("refresh").onclick = async function () { var r = await load(); if (r.ok) { renderOrders(); fillSettings(); } else note(r.error || "تعذّر التحديث", false); };
+  $("refresh").onclick = async function () { var rb = this; rb.classList.add("busy"); var r = await load(); rb.classList.remove("busy"); if (r.ok) { renderOrders(); fillSettings(); } else note(r.error || "تعذّر التحديث", false); };
   function tab(o) { $("vOrders").hidden = !o; $("vSettings").hidden = o; $("tOrders").setAttribute("aria-pressed", String(o)); $("tSettings").setAttribute("aria-pressed", String(!o)); }
   $("tOrders").onclick = function () { tab(true); }; $("tSettings").onclick = function () { tab(false); };
 
@@ -112,6 +113,7 @@
   }
   async function setStatus(id, st) { var r = await API.call("setStatus", { key: KEY, id: id, status: st }); if (r.ok) { ORDERS.forEach(function (o) { if (o.id === id) o.status = st; }); renderOrders(); } else note(r.error || "تعذّر تنفيذ العملية", false); }
 
+  IC.apply();
   var VIEW = "active";
   function setView(v) {
     VIEW = v;
@@ -143,10 +145,10 @@
         '<div class="meta">الصف: ' + esc(o.grade) + ' · المقاس: <b>' + esc(o.size) + '</b> · #' + o.id + '</div>' +
         '<div class="meta" dir="ltr" style="text-align:right">' + esc(o.phone) + '</div>' +
         '<div class="acts">' + (o.status === "cancelled"
-          ? '<button class="sm ghost" data-r="1">استعادة الطلب</button><button class="lnk dng" data-d="1">حذف نهائي</button>'
-          : '<a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">✓ اعتماد</a>' +
-            '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">✎ طلب تعديل</a>' +
-            '<button class="lnk dng" data-c="1">إلغاء الطلب</button>') + '</div>';
+          ? '<button class="sm ghost" data-r="1">' + IC("undo") + 'استعادة الطلب</button><button class="lnk dng" data-d="1">' + IC("trash") + 'حذف نهائي</button>'
+          : '<a class="btn sm wa" target="_blank" rel="noopener" data-a="approved">' + IC("chat") + 'اعتماد</a>' +
+            '<a class="btn sm warnb" target="_blank" rel="noopener" data-a="edit">' + IC("pencil") + 'طلب تعديل</a>' +
+            '<button class="lnk dng" data-c="1">' + IC("x") + 'إلغاء الطلب</button>') + '</div>';
       d.querySelectorAll("a[data-a]").forEach(function (a) {
         a.href = waLink(o, a.dataset.a);
         a.addEventListener("click", function () { setStatus(o.id, a.dataset.a); });
@@ -157,10 +159,10 @@
       var db = d.querySelector("[data-d]");
       if (db) db.onclick = function () {
         acts.innerHTML = '<div class="msg err" style="margin:0;flex:1 1 100%"><b>حذف نهائي</b> لطلب «' + esc(o.jacketName) + '» للطالب ' + esc(o.student) + '؟ لا يمكن التراجع عن هذا الإجراء.</div>' +
-          '<button class="sm danger" data-y="1">تأكيد الحذف النهائي</button><button class="sm ghost" data-n="1">تراجع</button>';
+          '<button class="sm danger" data-y="1">' + IC("check") + 'تأكيد الحذف النهائي</button><button class="sm ghost" data-n="1">تراجع</button>';
         acts.querySelector("[data-n]").onclick = function () { renderOrders(); };
         acts.querySelector("[data-y]").onclick = async function () {
-          this.disabled = true; this.textContent = "جارٍ الحذف...";
+          this.disabled = true; this.innerHTML = '<span class="spin"></span>جارٍ الحذف…';
           var r = await API.call("deleteOrder", { key: KEY, id: o.id });
           if (r.ok) { ORDERS = ORDERS.filter(function (x) { return x.id !== o.id; }); renderOrders(); note("تم حذف الطلب نهائياً.", true); }
           else { renderOrders(); note(r.error === "طلب غير معروف" ? "الخادم لا يدعم الحذف بعد: حدّث كود Apps Script وأعد النشر (إصدار جديد)." : (r.error || "تعذّر الحذف"), false); }
@@ -168,8 +170,8 @@
       };
       if (cb) cb.onclick = function () {
         acts.innerHTML = '<div class="msg err" style="margin:0;flex:1 1 100%">هل تريد إلغاء طلب «' + esc(o.jacketName) + '» للطالب ' + esc(o.student) + '؟</div>' +
-          '<button class="sm danger" data-y="1">تأكيد الإلغاء</button><button class="sm ghost" data-n="1">تراجع</button>';
-        acts.querySelector("[data-y]").onclick = function () { this.disabled = true; this.textContent = "جارٍ الإلغاء..."; setStatus(o.id, "cancelled"); };
+          '<button class="sm danger" data-y="1">' + IC("check") + 'تأكيد الإلغاء</button><button class="sm ghost" data-n="1">تراجع</button>';
+        acts.querySelector("[data-y]").onclick = function () { this.disabled = true; this.innerHTML = '<span class="spin"></span>جارٍ الإلغاء…'; setStatus(o.id, "cancelled"); };
         acts.querySelector("[data-n]").onclick = function () { renderOrders(); };
       };
       $("list").appendChild(d);

@@ -44,16 +44,18 @@
       <div class="sect">
         <label class="check"><input id="ok" type="checkbox"><span>أؤكد أن الاسم المكتوب على الجاكيت صحيح، وأن بياناتي صحيحة.</span></label>
         <div id="err" class="msg err" role="alert" hidden></div>
-        <button id="send" class="block" type="submit" style="margin-top:12px">إرسال الطلب</button>
+        <button id="send" class="block" type="submit" data-ic="send" style="margin-top:12px">إرسال الطلب</button>
       </div>
     </form>
   </div>
   <div id="done" class="card done" hidden></div>
 </main>
-<footer class="foot"><a href="admin.html" rel="nofollow">إدارة الصفحة</a></footer>
+<footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
 <script src="assets/config.js"></script>
+<script src="assets/icons.js"></script>
 <script src="assets/api.js"></script>
 <script src="assets/jacket.js"></script>
+<script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -138,12 +140,12 @@
     need($("phone"), ph.length ? "رقم هاتف صحيح (8 أرقام)" : "رقم الهاتف", ph.length !== 8);
     var noOk = !$("ok").checked; if (noOk) { miss.push("تأكيد صحة البيانات"); if (!first) first = $("ok"); }
     if (miss.length) { fail("الناقص: " + miss.join("، ")); if (first && first.focus) first.focus({ preventScroll: true }); return; }
-    var b = $("send"); b.disabled = true; b.textContent = "جارٍ الإرسال...";
+    var b = $("send"); b.disabled = true; b.innerHTML = '<span class="spin"></span>جارٍ الإرسال…';
     await settingsReady;                      /* يضمن استخدام أحدث إعدادات المقاسات والحروف */
-    if (!S.open) { b.disabled = false; b.textContent = "إرسال الطلب"; return fail(S.closedMessage); }
-    if (jn.length > max || S.sizes.indexOf(size) < 0) { b.disabled = false; b.textContent = "إرسال الطلب"; return fail(jn.length > max ? "الاسم أطول من الحد المسموح (" + max + " حروف)." : "المقاس غير متاح."); }
+    if (!S.open) { b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب"; return fail(S.closedMessage); }
+    if (jn.length > max || S.sizes.indexOf(size) < 0) { b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب"; return fail(jn.length > max ? "الاسم أطول من الحد المسموح (" + max + " حروف)." : "المقاس غير متاح."); }
     var res = await API.call("submit", { order: { jacketName: jn, size: size, student: st, grade: gr, phone: ph } });
-    b.disabled = false; b.textContent = "إرسال الطلب";
+    b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب";
     if (!res.ok) return fail(res.error || "تعذّر إرسال الطلب.");
     $("app").hidden = true; var d = $("done"); d.hidden = false;
     d.innerHTML = '<div class="big">✓</div><h2>' + (res.updated ? "تم تحديث طلبك" : "تم استلام طلبك") + '</h2>' +

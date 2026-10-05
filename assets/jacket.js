@@ -25,7 +25,7 @@
     el.innerHTML = '<div class="jwrap" data-view="back">' +
       '<div class="jview jv-back">' + backSvg() + '</div>' +
       '<div class="jview jv-front"></div>' +
-      '<div class="jtoggle" role="group" aria-label="وجه الجاكيت"><button type="button" data-v="back" aria-pressed="true">الخلف</button><button type="button" data-v="front" aria-pressed="false">الأمام</button></div>' +
+      '<div class="jtoggle" role="group" aria-label="وجه الجاكيت"><button type="button" data-v="back" aria-pressed="true">' + (window.IC?IC("shirt"):"") + 'الخلف</button><button type="button" data-v="front" aria-pressed="false">' + (window.IC?IC("shirt"):"") + 'الأمام</button></div>' +
       '</div>';
     var wrap = el.querySelector(".jwrap"); wrap.__p = p;
     wrap.addEventListener("click", function (e) {

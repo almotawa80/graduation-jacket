@@ -132,3 +132,48 @@ input.bad{box-shadow:0 0 0 3px rgba(179,38,30,.15)}
 .order .acts .msg{grid-column:1/-1}
 .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:520px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.seg button{padding:8px 14px}}
+
+/* ===== أيقونات وحركات وأزرار مريحة للّمس ===== */
+.ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;margin-inline-end:.45em}
+.lnk .ic,.seg .ic{width:1.1em;height:1.1em}
+button,.btn,.lnk,.chip span{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+button,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px}
+button.sm,.btn.sm{min-height:44px;padding:8px 14px}
+button.block{display:flex;width:100%;min-height:54px;position:relative;overflow:hidden}
+button:active:not(:disabled),.btn:active,.chip:active span{transform:scale(.96)!important;box-shadow:none!important;transition-duration:.06s}
+.lnk{min-height:40px;align-items:center}
+.lnk:active{background:#d3d9ec!important}
+/* لمعان خفيف يمرّ على الأزرار الرئيسية */
+button.block::after,.wa::after,.warnb::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-120%);transition:transform .7s}
+.wa,.warnb{position:relative;overflow:hidden}
+button.block:hover:not(:disabled)::after,.wa:hover::after,.warnb:hover::after{transform:translateX(120%)}
+button.block:hover:not(:disabled) .ic{animation:fly .6s ease}
+@keyframes fly{40%{transform:translate(-6px,-4px) rotate(-12deg)}100%{transform:none}}
+.wa:hover .ic,.warnb:hover .ic{animation:wob .5s}
+@keyframes wob{25%{transform:rotate(-14deg)}60%{transform:rotate(10deg)}100%{transform:none}}
+.chip input:checked+span{animation:pop .28s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.9)}100%{transform:scale(1)}}
+.seg button{transition:background .2s,color .2s}
+.seg button[aria-pressed="true"] .ic{animation:pop .3s}
+.lnk[data-ic="refresh"]:active .ic,.lnk[data-ic="refresh"].busy .ic{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:1em;height:1em;border:2.5px solid currentColor;border-top-color:transparent;border-radius:50%;display:inline-block;margin-inline-end:.5em;animation:spin .7s linear infinite}
+/* دخول البطاقات */
+.order,.stat{animation:rise .4s both}
+.order:nth-child(2){animation-delay:.05s}.order:nth-child(3){animation-delay:.1s}.order:nth-child(4){animation-delay:.15s}.order:nth-child(n+5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.order:hover{transform:translateY(-2px);box-shadow:0 16px 30px -20px rgba(20,24,56,.6);transition:transform .18s,box-shadow .18s}
+.msg{animation:rise .25s both}
+.foot a{display:inline-flex;align-items:center}
+/* ترتيب البطاقة: الإجراءان الرئيسيان ثم إجراء ثانوي هادئ */
+.order .acts .lnk{min-height:36px}
+.order .acts.canc{grid-template-columns:1fr}
+.order .acts [data-r]{grid-column:1/-1}
+.tools .lnk.boxed{min-height:50px}
+.tools input,.tools select{min-height:50px}
+@media(min-width:700px) and (max-width:1100px){.orders{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.stage svg.ic,.jtoggle svg.ic{display:inline-block;width:1.1em;height:1.1em;max-height:none;margin:0 0 0 .4em;vertical-align:-.2em}
+.jtoggle button{display:inline-flex;align-items:center;min-height:36px;padding:4px 12px}
+.chips{grid-template-columns:repeat(5,minmax(0,1fr))}
+.chip span{padding:12px 4px}
