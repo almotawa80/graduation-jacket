@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+<link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
@@ -82,8 +83,12 @@
   }
   $("login").addEventListener("submit", async function (e) {
     e.preventDefault(); KEY = $("pw").value;
+    var btn = $("login").querySelector("button"); btn.disabled = true; btn.textContent = "جارٍ الدخول…"; $("lerr").hidden = true;
+    /* إظهار اللوحة فوراً أثناء انتظار الخادم، والرجوع لشاشة الدخول إن كانت الكلمة خاطئة */
+    $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
     var r = await load();
-    if (!r.ok) { $("lerr").textContent = r.error || "تعذّر الدخول"; $("lerr").hidden = false; return; }
+    btn.disabled = false; btn.textContent = "دخول";
+    if (!r.ok) { $("panel").hidden = true; $("login").hidden = false; $("lerr").textContent = r.error || "تعذّر الدخول"; $("lerr").hidden = false; return; }
     try { sessionStorage.setItem("jk_key", KEY); } catch (x) {}
     show();
   });
