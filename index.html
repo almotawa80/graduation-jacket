@@ -9,8 +9,8 @@
 <link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005c">
-<link rel="stylesheet" href="assets/style.css?v=20261005c">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005d">
+<link rel="stylesheet" href="assets/style.css?v=20261005d">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
@@ -55,10 +55,10 @@
   <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
 </div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
-<script src="assets/config.js?v=20261005c"></script>
-<script src="assets/icons.js?v=20261005c"></script>
-<script src="assets/api.js?v=20261005c"></script>
-<script src="assets/jacket.js?v=20261005c"></script>
+<script src="assets/config.js?v=20261005d"></script>
+<script src="assets/icons.js?v=20261005d"></script>
+<script src="assets/api.js?v=20261005d"></script>
+<script src="assets/jacket.js?v=20261005d"></script>
 <script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
@@ -128,6 +128,7 @@
     vv.addEventListener("resize", pin); vv.addEventListener("scroll", pin);
   }
 
+  function esc2(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function fail(m) { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: "center", behavior: "smooth" }); }
   /* رقم الهاتف: أرقام فقط وثمانية بالضبط (يُزال مفتاح 965 عند اللصق) */
   $("phone").addEventListener("input", function () {
@@ -160,13 +161,16 @@
     var res = await API.call("submit", { order: { jacketName: jn, size: size, student: st, grade: gr, phone: ph } });
     b.disabled = false; b.innerHTML = IC("send") + "إرسال الطلب";
     if (!res.ok) return fail(res.error || "تعذّر إرسال الطلب.");
-    $("app").hidden = true; var d = $("done"); d.hidden = false;
-    d.innerHTML = '<div class="big">✓</div><h2>' + (res.updated ? "تم تحديث طلبك" : "تم استلام طلبك") + '</h2>' +
-      '<div class="stage" style="max-width:260px;margin:0 auto"></div>' +
-      '<div class="sum"><div>رقم الطلب: <b>' + res.id + '</b></div><div>المقاس: <b>' + size + '</b></div></div>' +
-      '<p class="hint">سيتواصل معك المشرف عبر واتساب لاعتماد الطلب.</p>';
+    $("app").hidden = true; document.body.classList.add("is-done"); var d = $("done"); d.hidden = false;
+    d.innerHTML = '<svg class="okmark" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M14 27l8 8 16-17"/></svg>' +
+      '<h2 id="doneH" tabindex="-1">' + (res.updated ? "تم تحديث طلبك بنجاح" : "تم استلام طلبك بنجاح") + '</h2>' +
+      '<p class="sub">شكراً لك، وصلنا طلبك وسيراجعه المشرف.</p>' +
+      '<div class="stage" style="max-width:240px;margin:6px auto 0"></div>' +
+      '<div class="sum"><div>رقم الطلب: <b>' + res.id + '</b></div><div>الاسم الكامل: <b>' + esc2(st) + '</b></div><div>المقاس: <b>' + size + '</b></div></div>' +
+      '<div class="msg info nx"><b>الخطوة التالية:</b> سيتواصل معك المشرف عبر واتساب على الرقم <b dir="ltr">' + esc2(ph) + '</b> لاعتماد الطلب. احتفظ برقم الطلب.</div>';
     var s2 = Jacket.mount(d.querySelector(".stage")); Jacket.update(s2, jn, S.number);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    var top = function () { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; try { $("doneH").focus({ preventScroll: true }); } catch (e) {} };
+    top(); requestAnimationFrame(top); setTimeout(top, 120);
   });
 })();
 </script>

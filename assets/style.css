@@ -242,3 +242,19 @@ button,.btn,.lnk{gap:0}
   .stage-card .jtoggle button{min-height:30px;padding:2px 12px}
   .stage-card .jtoggle svg.ic{display:none!important}
 }
+
+/* شاشة تم الاستلام */
+body.is-done .sendbar{display:none!important}
+body.is-done{padding-bottom:0}
+.done{max-width:520px;margin:18px auto;padding:26px 18px}
+.done .big{display:none}
+.okmark{width:84px;height:84px;display:block;margin:0 auto 6px}
+.okmark circle{fill:#e4f4ea;stroke:var(--ok);stroke-width:2.5;stroke-dasharray:152;stroke-dashoffset:152;animation:draw .6s ease forwards}
+.okmark path{fill:none;stroke:var(--ok);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:draw .4s .5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.done h2{font-size:24px;margin:4px 0 2px;color:var(--ok);outline:0}
+.done .sub{margin:0 0 4px;color:var(--mut)}
+.done .sum{display:block;text-align:right;margin:14px auto 0;max-width:340px}
+.done .nx{text-align:right;margin:14px 0 0}
+[hidden]{display:none!important}
+.done .jtoggle{display:none}
