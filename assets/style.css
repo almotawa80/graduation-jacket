@@ -177,3 +177,16 @@ button.block:hover:not(:disabled) .ic{animation:fly .6s ease}
 .jtoggle button{display:inline-flex;align-items:center;min-height:36px;padding:4px 12px}
 .chips{grid-template-columns:repeat(5,minmax(0,1fr))}
 .chip span{padding:12px 4px}
+
+/* رأس مضغوط بلون الشعار الكحلي، والشعار داخل مستطيل أبيض صغير */
+header.top{background:linear-gradient(180deg,#232b67,#1d2252);border-bottom:3px solid var(--beige);padding:10px 16px;text-align:start}
+header.top .hd{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:12px}
+header.top h1{color:#fff;font-size:22px;line-height:1.25;margin:0}
+header.top h1::after{display:none}
+header.top p{color:#d9d6c3;font-size:14px;line-height:1.45;margin:2px 0 0;max-width:none}
+header.top p:empty{display:none}
+header.top .ht{min-width:0}
+.brand{flex:none}
+.brand img{display:block;height:46px;width:auto;background:#fff;padding:4px 6px;border-radius:8px;box-shadow:none}
+header.top:not(:has(.hd)){text-align:center;padding:14px 16px}
+@media(max-width:859px){.brand img{height:42px}header.top h1{font-size:19px}header.top p{font-size:13px}}
