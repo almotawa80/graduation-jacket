@@ -195,7 +195,10 @@
     if (r.ok) SET = Object.assign({}, SET, s);
   });
 
-  try { var k = sessionStorage.getItem("jk_key"); if (k) { KEY = k; load().then(function (r) { if (r.ok) show(); }); } } catch (x) {}
+  try { var k = sessionStorage.getItem("jk_key"); if (k) { KEY = k;
+    /* جلسة محفوظة: أظهر اللوحة فوراً بدل شاشة الدخول، وارجع للدخول فقط إن فشل التحقق */
+    $("login").hidden = true; $("panel").hidden = false; $("list").innerHTML = '<div class="msg info">جارٍ تحميل الطلبات…</div>';
+    load().then(function (r) { if (r.ok) show(); else { $("panel").hidden = true; $("login").hidden = false; } }); } } catch (x) {}
 })();
 </script>
 </body>
