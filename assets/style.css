@@ -293,3 +293,7 @@ button.nextbtn{display:none}
 .done h2.pending{color:var(--navy)}
 body.is-done .stepbar{display:none!important}
 .spin.lg{display:block;border:5px solid #d9deec;border-top-color:var(--navy);color:var(--navy)}
+
+/* الشعار الجديد: كلمة «الرؤية» مباشرة على الشريط الكحلي */
+.brand img{height:44px;width:auto;background:none;padding:0;border-radius:0;box-shadow:none}
+@media(max-width:859px){.brand img{height:40px}}

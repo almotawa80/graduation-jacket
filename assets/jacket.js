@@ -16,7 +16,7 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + VB + ' role="img" aria-label="أمام جاكيت التخرج">' +
       '<image href="assets/hoodie-front.webp" x="0" y="0" width="600" height="782"/>' +
       /* شعار المدرسة على الصدر الأيسر للابس */
-      '<image href="assets/logo-chest.webp" x="378" y="262" width="78" height="63" preserveAspectRatio="xMidYMid meet"/>' +
+      '<image href="assets/logo-word.webp" x="374" y="266" width="88" height="52" preserveAspectRatio="xMidYMid meet"/>' +
       '</svg>';
   }
 
