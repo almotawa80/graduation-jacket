@@ -107,3 +107,7 @@ input.bad{box-shadow:0 0 0 3px rgba(179,38,30,.15)}
 .namefield input[type=text].bad{border-color:var(--bad)!important}
 .danger-o{color:#b3261e!important;border-color:#b3261e!important}
 .danger-o:hover:not(:disabled){background:#fde8e6!important}
+.foot{text-align:center;padding:8px 16px 28px}
+.foot a{color:var(--mut);font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:6px 16px;background:var(--card);display:inline-block}
+.foot a:hover{color:var(--navy);border-color:var(--navy)}
+.foot a:focus-visible{outline:3px solid var(--beige);outline-offset:2px}
