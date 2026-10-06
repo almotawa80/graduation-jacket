@@ -11,8 +11,8 @@
 <link rel="preload" href="assets/foda.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/bodoni-digits.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/fonts.css?v=20261005l">
-<link rel="stylesheet" href="assets/style.css?v=20261005l">
+<link rel="stylesheet" href="assets/fonts.css?v=20261005m">
+<link rel="stylesheet" href="assets/style.css?v=20261005m">
 </head>
 <body>
 <div id="demo" class="demo" hidden>وضع تجريبي: الطلبات تُحفظ في متصفحك فقط حتى يُضبط رابط الخادم.</div>
@@ -26,6 +26,7 @@
         <label for="jname" class="stephead" style="margin-bottom:8px"><span class="n">1</span><h2>الاسم أو الختم على الجاكيت</h2></label>
         <input id="jname" type="text" inputmode="text" lang="ar" dir="rtl" placeholder="اكتب هنا" autocomplete="off" enterkeyhint="done" required>
         <div class="counter"><span>حروف عربية فقط</span><span id="cnt"></span></div>
+        <div class="namewarn" id="nameWarn" role="alert" aria-live="assertive" hidden></div>
       </div>
       <div class="stage" id="jacket"></div>
       <button type="button" id="nextBtn" class="block nextbtn">التالي: المقاس والبيانات</button>
@@ -60,11 +61,11 @@
   <button type="button" id="sbSend" class="sb-btn" data-ic="send">إرسال الطلب</button>
 </div>
 <footer class="foot"><a href="admin.html" rel="nofollow" data-ic="gear">إدارة الصفحة</a></footer>
-<script src="assets/config.js?v=20261005l"></script>
-<script src="assets/icons.js?v=20261005l"></script>
-<script src="assets/api.js?v=20261005l"></script>
-<script src="assets/jacket.js?v=20261005l"></script>
-<script src="assets/card.js?v=20261005l"></script>
+<script src="assets/config.js?v=20261005m"></script>
+<script src="assets/icons.js?v=20261005m"></script>
+<script src="assets/api.js?v=20261005m"></script>
+<script src="assets/jacket.js?v=20261005m"></script>
+<script src="assets/card.js?v=20261005m"></script>
 <script>try{IC.apply()}catch(e){}</script>
 <script>
 (function () {
@@ -80,10 +81,23 @@
   var max = 8;
 
   function clean(v) { return v.replace(/[^ء-غف-يـ ]/g, "").replace(/\s{2,}/g, " ").slice(0, max); }
+  var warnT;
+  function warn(m) {
+    var w = $("nameWarn"); w.textContent = m; w.hidden = false;
+    nameEl.classList.remove("shake"); void nameEl.offsetWidth; nameEl.classList.add("shake");
+    if (navigator.vibrate) try { navigator.vibrate(40); } catch (e) {}
+    clearTimeout(warnT); warnT = setTimeout(function () { w.hidden = true; }, 3500);
+  }
   function upd() {
-    var v = clean(nameEl.value);
-    if (v !== nameEl.value) nameEl.value = v;
+    var raw = nameEl.value, v = clean(raw);
+    if (v !== raw) {
+      var arOnly = raw.replace(/[^ء-غف-يـ ]/g, "").replace(/\s{2,}/g, " ");
+      if (arOnly.length > max) warn("الحد الأقصى " + max + " حروف فقط، لذلك لن تُضاف حروف أخرى.");
+      else warn("يُسمح بالحروف العربية فقط (بدون أرقام أو رموز أو حروف إنجليزية).");
+      nameEl.value = v;
+    }
     $("cnt").textContent = v.length + " / " + max;
+    $("cnt").classList.toggle("full", v.length >= max);
     Jacket.update(svg, v.trim() || "اسمك", S.number);
   }
   function renderSizes() {
@@ -94,7 +108,7 @@
   }
   function apply() {
     $("title").textContent = S.title; $("intro").textContent = S.intro; document.title = S.title;
-    max = +S.maxChars || 8; nameEl.maxLength = max;
+    max = +S.maxChars || 8; nameEl.removeAttribute("maxlength");
     renderSizes(); upd();
     var open = !!S.open;
     $("closed").textContent = S.closedMessage; $("closed").hidden = open;

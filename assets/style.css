@@ -367,3 +367,11 @@ button.block .ic{color:var(--gold)}
   button.ghost,.btn.ghost{background:transparent;color:#f1ecd6;border-color:var(--gold)}
   .spin.lg{border-color:#2c3466;border-top-color:var(--gold)}
 }
+
+/* تنبيه تجاوز عدد الحروف */
+.namewarn{margin-top:8px;padding:9px 12px;border-radius:10px;background:#fff4dc;color:#7a5200;border:1px solid var(--gold);font-size:15px;font-weight:700;animation:rise .2s both}
+.counter #cnt.full{background:#fde8e6;color:var(--bad)}
+.namefield input.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.namefield input.shake{animation:none}}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .namewarn{background:#3a3112;color:#f3e2a8}:root:not([data-theme=light]) .counter #cnt.full{background:#431a1a;color:#ffb4ab}}
